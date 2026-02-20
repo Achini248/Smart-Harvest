@@ -1,3 +1,4 @@
+//update auth_event.dart
 import 'package:equatable/equatable.dart';
 
 abstract class AuthEvent extends Equatable {
