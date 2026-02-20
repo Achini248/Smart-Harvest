@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../features/authentication/presentation/pages/login_page.dart';
 import '../../features/authentication/presentation/pages/signup_page.dart';
-import '../../features/authentication/presentation/pages/profile_settings_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/pages/onboarding_page.dart';
 import '../../features/home/presentation/pages/splash_screen.dart';
@@ -28,9 +27,6 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const HomePage());
       
       // Profile Routes
-      // case RouteNames.profileSettings:
-      //   return MaterialPageRoute(builder: (_) => const ProfileSettingsPage());
-      
       case RouteNames.accountSettings:
         return _comingSoonRoute('Account Settings');
       

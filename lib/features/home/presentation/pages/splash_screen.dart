@@ -33,15 +33,16 @@ class _SplashScreenState extends State<SplashScreen> {
     final prefs = await SharedPreferences.getInstance();
     final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
 
-    // Check authentication status
-    context.read<AuthBloc>().add(CheckAuthStatusEvent());
+    // Check authentication status - get bloc reference before async
+    final authBloc = context.read<AuthBloc>();
+    authBloc.add(CheckAuthStatusEvent());
     
     // Wait a bit for auth check
     await Future.delayed(const Duration(milliseconds: 500));
     
     if (!mounted) return;
 
-    final authState = context.read<AuthBloc>().state;
+    final authState = authBloc.state;
 
     // Navigation logic
     if (!onboardingComplete) {

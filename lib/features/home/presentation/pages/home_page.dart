@@ -379,8 +379,8 @@ class ProfileTabView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
                       child: Text(
                         'Cancel',
                         style: AppTextStyles.bodyTextBold,
