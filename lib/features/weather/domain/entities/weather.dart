@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 class Weather extends Equatable {
   final String location;
   final double temperatureC;
-  final String condition;       // "Sunny", "Rainy", etc.
+  final String condition;
   final int humidity;
   final double windSpeedKmh;
   final List<WeatherForecast> forecast;
@@ -18,8 +18,7 @@ class Weather extends Equatable {
   });
 
   @override
-  List<Object?> get props =>
-      [location, temperatureC, condition, humidity, windSpeedKmh, forecast];
+  List<Object?> get props => [location, temperatureC, condition, humidity, windSpeedKmh, forecast];
 }
 
 class WeatherForecast extends Equatable {
@@ -38,3 +37,4 @@ class WeatherForecast extends Equatable {
   @override
   List<Object?> get props => [day, highC, lowC, condition];
 }
+
