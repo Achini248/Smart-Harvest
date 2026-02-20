@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// Onboarding page updated - Achiniimport 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
