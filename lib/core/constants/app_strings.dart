@@ -1,3 +1,4 @@
+//update App_string.dart
 class AppStrings {
   // App
   static const String appName = 'Smart Harvest';
