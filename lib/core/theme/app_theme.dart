@@ -1,4 +1,3 @@
-//App theme 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
@@ -15,6 +14,7 @@ class AppTheme {
       primary: AppColors.primaryGreen,
       secondary: AppColors.primaryGreenLight,
       error: AppColors.error,
+      background: AppColors.backgroundLight,
       surface: AppColors.cardBackground,
     ),
     
@@ -42,26 +42,26 @@ class AppTheme {
     inputDecorationTheme: InputDecorationTheme(
       filled: false,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: const UnderlineInputBorder(
+      border: UnderlineInputBorder(
         borderSide: BorderSide(color: AppColors.lightGrey),
       ),
-      enabledBorder: const UnderlineInputBorder(
+      enabledBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: AppColors.lightGrey),
       ),
-      focusedBorder: const UnderlineInputBorder(
+      focusedBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: AppColors.primaryGreen, width: 2),
       ),
-      errorBorder: const UnderlineInputBorder(
+      errorBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: AppColors.error),
       ),
       hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textHint),
     ),
     
-    cardTheme: const CardThemeData(
+    cardTheme: CardTheme(
       color: AppColors.cardBackground,
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: BorderRadius.circular(16),
       ),
     ),
   );
