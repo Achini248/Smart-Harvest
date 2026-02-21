@@ -1,39 +1,32 @@
+// lib/features/authentication/data/repositories/auth_repository_impl.dart
+
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
-
   AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<User> login(String email, String password) async {
-    final userModel = await remoteDataSource.login(email, password);
-    return userModel.toEntity();
-  }
+  Future<User?> getCurrentUser() => remoteDataSource.getCurrentUser();
 
   @override
-  Future<User> register(String email, String password, String phoneNo) async {
-    final userModel = await remoteDataSource.register(email, password, phoneNo);
-    return userModel.toEntity();
-  }
-
-  // NEW: Google Sign-In
-  @override
-  Future<User> signInWithGoogle() async {
-    final userModel = await remoteDataSource.signInWithGoogle();
-    return userModel.toEntity();
-  }
+  Future<User> login(String email, String password) =>
+      remoteDataSource.login(email, password);
 
   @override
-  Future<void> logout() async {
-    await remoteDataSource.logout();
-  }
+  Future<User> register(String email, String password, String phone) =>
+      remoteDataSource.register(email, password, phone);
 
   @override
-  Future<User?> getCurrentUser() async {
-    final userModel = await remoteDataSource.getCurrentUser();
-    return userModel?.toEntity();
-  }
+  Future<void> logout() => remoteDataSource.logout();
+
+  @override
+  Future<String> sendOtp(String phoneNumber) =>
+      remoteDataSource.sendOtp(phoneNumber);
+
+  @override
+  Future<User> verifyOtp(String verificationId, String otpCode) =>
+      remoteDataSource.verifyOtp(verificationId, otpCode);
 }

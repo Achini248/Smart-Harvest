@@ -1,126 +1,81 @@
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:google_sign_in/google_sign_in.dart';
+// lib/features/authentication/data/datasources/auth_remote_datasource.dart
+
+import '../../domain/entities/user.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> login(String email, String password);
-  Future<UserModel> register(String email, String password, String phoneNo);
-  Future<UserModel> signInWithGoogle(); // NEW
+  Future<User?> getCurrentUser();
+  Future<User> login(String email, String password);
+  Future<User> register(String email, String password, String phone);
   Future<void> logout();
-  Future<UserModel?> getCurrentUser();
+  Future<String> sendOtp(String phoneNumber);
+  Future<User> verifyOtp(String verificationId, String otpCode);
 }
 
+// DUMMY implementation — replace with real Firebase calls later
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final firebase_auth.FirebaseAuth firebaseAuth;
-  final GoogleSignIn googleSignIn; // NEW
-
-  AuthRemoteDataSourceImpl({
-    required this.firebaseAuth,
-    required this.googleSignIn, // NEW
-  });
-
   @override
-  Future<UserModel> login(String email, String password) async {
-    try {
-      final credential = await firebaseAuth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      if (credential.user == null) {
-        throw Exception('Login failed');
-      }
-
-      return UserModel(
-        id: credential.user!.uid,
-        email: credential.user!.email!,
-        name: credential.user!.displayName,
-        phoneNo: credential.user!.phoneNumber,
-      );
-    } catch (e) {
-      throw Exception('Login failed: ${e.toString()}');
-    }
+  Future<User?> getCurrentUser() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    return null; // No user logged in initially
   }
 
   @override
-  Future<UserModel> register(String email, String password, String phoneNo) async {
-    try {
-      final credential = await firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      if (credential.user == null) {
-        throw Exception('Registration failed');
-      }
-
-      return UserModel(
-        id: credential.user!.uid,
-        email: email,
-        phoneNo: phoneNo,
-      );
-    } catch (e) {
-      throw Exception('Registration failed: ${e.toString()}');
+  Future<User> login(String email, String password) async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    // Dummy validation
+    if (email.isEmpty || password.isEmpty) {
+      throw Exception('Email and password are required');
     }
+    if (password.length < 6) {
+      throw Exception('wrong-password');
+    }
+    return UserModel(
+      id: 'user_${email.hashCode}',
+      email: email,
+      phone: '',
+    );
   }
 
-  // NEW: Google Sign-In Implementation
   @override
-  Future<UserModel> signInWithGoogle() async {
-    try {
-      // Trigger Google Sign-In flow
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      
-      if (googleUser == null) {
-        throw Exception('Google Sign-In cancelled');
-      }
-
-      // Obtain auth details
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      // Create Firebase credential
-      final credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Sign in to Firebase
-      final userCredential = await firebaseAuth.signInWithCredential(credential);
-
-      if (userCredential.user == null) {
-        throw Exception('Google Sign-In failed');
-      }
-
-      return UserModel(
-        id: userCredential.user!.uid,
-        email: userCredential.user!.email!,
-        name: userCredential.user!.displayName,
-        phoneNo: userCredential.user!.phoneNumber,
-        profilePhotoUrl: userCredential.user!.photoURL,
-      );
-    } catch (e) {
-      throw Exception('Google Sign-In failed: ${e.toString()}');
+  Future<User> register(String email, String password, String phone) async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (email.isEmpty || password.isEmpty) {
+      throw Exception('All fields are required');
     }
+    return UserModel(
+      id: 'user_${email.hashCode}',
+      email: email,
+      phone: phone,
+    );
   }
 
   @override
   Future<void> logout() async {
-    await Future.wait([
-      firebaseAuth.signOut(),
-      googleSignIn.signOut(), // Sign out from Google too
-    ]);
+    await Future.delayed(const Duration(milliseconds: 300));
   }
 
   @override
-  Future<UserModel?> getCurrentUser() async {
-    final user = firebaseAuth.currentUser;
-    if (user == null) return null;
+  Future<String> sendOtp(String phoneNumber) async {
+    await Future.delayed(const Duration(milliseconds: 1000));
+    if (phoneNumber.isEmpty) {
+      throw Exception('invalid-phone-number');
+    }
+    // Return a dummy verificationId
+    return 'dummy_verification_id_${phoneNumber.hashCode}';
+  }
 
+  @override
+  Future<User> verifyOtp(String verificationId, String otpCode) async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    // Dummy: accept "123456" as the valid OTP
+    if (otpCode != '123456') {
+      throw Exception('invalid-verification-code');
+    }
     return UserModel(
-      id: user.uid,
-      email: user.email!,
-      name: user.displayName,
-      phoneNo: user.phoneNumber,
+      id: 'verified_user',
+      email: 'user@smartharvest.lk',
+      phone: '',
     );
   }
 }

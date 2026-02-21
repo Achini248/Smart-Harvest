@@ -1,10 +1,9 @@
-//update auth_state.dart
+// lib/features/authentication/presentation/bloc/auth_state.dart
+
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user.dart';
 
 abstract class AuthState extends Equatable {
-  const AuthState();
-
   @override
   List<Object?> get props => [];
 }
@@ -13,21 +12,56 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
-class Authenticated extends AuthState {
-  final User user;
+class AuthUnauthenticated extends AuthState {}
 
-  const Authenticated({required this.user});
+class AuthAuthenticated extends AuthState {
+  final User user;
+  AuthAuthenticated(this.user);
 
   @override
   List<Object?> get props => [user];
 }
 
-class Unauthenticated extends AuthState {}
+class AuthOtpSent extends AuthState {
+  final String verificationId;
+  final String phoneNumber;
 
+  AuthOtpSent({
+    required this.verificationId,
+    required this.phoneNumber,
+  });
+
+  @override
+  List<Object?> get props => [verificationId, phoneNumber];
+}
+
+class AuthOtpTimerTick extends AuthState {
+  final String verificationId;
+  final String phoneNumber;
+  final int secondsLeft;
+
+  AuthOtpTimerTick({
+    required this.verificationId,
+    required this.phoneNumber,
+    required this.secondsLeft,
+  });
+
+  @override
+  List<Object?> get props => [verificationId, phoneNumber, secondsLeft];
+}
+
+class AuthProfileUpdated extends AuthState {
+  final User user;
+  AuthProfileUpdated(this.user);
+
+  @override
+  List<Object?> get props => [user];
+}
+
+// FIXED: positional constructor — AuthError('message')
 class AuthError extends AuthState {
   final String message;
-
-  const AuthError({required this.message});
+  AuthError(this.message);
 
   @override
   List<Object?> get props => [message];

@@ -1,25 +1,19 @@
+// lib/features/authentication/data/models/user_model.dart
+
 import '../../domain/entities/user.dart';
 
 class UserModel extends User {
   const UserModel({
     required super.id,
     required super.email,
-    super.name,
-    super.phoneNo,
-    super.location,
-    super.profilePhotoUrl,
-    super.role,
+    super.phone,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] ?? '',
       email: json['email'] ?? '',
-      name: json['name'],
-      phoneNo: json['phoneNo'],
-      location: json['location'],
-      profilePhotoUrl: json['profilePhotoUrl'],
-      role: json['role'] ?? 'farmer',
+      phone: json['phone'] ?? '',
     );
   }
 
@@ -27,23 +21,7 @@ class UserModel extends User {
     return {
       'id': id,
       'email': email,
-      'name': name,
-      'phoneNo': phoneNo,
-      'location': location,
-      'profilePhotoUrl': profilePhotoUrl,
-      'role': role,
+      'phone': phone,
     };
-  }
-
-  User toEntity() {
-    return User(
-      id: id,
-      email: email,
-      name: name,
-      phoneNo: phoneNo,
-      location: location,
-      profilePhotoUrl: profilePhotoUrl,
-      role: role,
-    );
   }
 }

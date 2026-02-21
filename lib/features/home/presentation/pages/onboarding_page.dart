@@ -1,9 +1,23 @@
-// Onboarding page updated - Achiniimport 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// lib/features/home/presentation/pages/onboarding_page.dart
+
+import 'package:flutter/material.dart';    // ← THIS was missing — caused ALL onboarding errors
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../../../config/routes/route_names.dart';
+
+class OnboardingItem {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color bgColor;
+
+  const OnboardingItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.bgColor,
+  });
+}
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -16,24 +30,27 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<OnboardingItem> _items = [
+  final List<OnboardingItem> _items = const [
     OnboardingItem(
-      title: AppStrings.planForTomorrow,
-      description: 'Plan your crops smarter with real-time data and insights',
+      title: 'Welcome to Smart Harvest',
+      subtitle:
+          'Connecting farmers, buyers, and agriculture officers on one platform.',
       icon: Icons.agriculture,
-      bgColor: const Color(0xFFE8F5E9),
+      bgColor: Color(0xFFE8F5E9),
     ),
     OnboardingItem(
-      title: AppStrings.protectYourHarvest,
-      description: 'Get weather alerts and pest warnings to protect your yield',
+      title: 'Real-Time Market Prices',
+      subtitle:
+          'Get daily crop price updates and weather forecasts directly on your phone.',
       icon: Icons.wb_sunny_outlined,
-      bgColor: const Color(0xFFFFF8E1),
+      bgColor: Color(0xFFFFF8E1),
     ),
     OnboardingItem(
-      title: AppStrings.yourFarmYourPrice,
-      description: 'Connect with buyers and sell your crops at the best price',
+      title: 'Trade Smarter',
+      subtitle:
+          'Browse listings, place orders, and chat with buyers and officers instantly.',
       icon: Icons.handshake_outlined,
-      bgColor: const Color(0xFFE3F2FD),
+      bgColor: Color(0xFFE3F2FD),
     ),
   ];
 
@@ -43,57 +60,47 @@ class _OnboardingPageState extends State<OnboardingPage> {
     super.dispose();
   }
 
-  Future<void> _completeOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_complete', true);
-
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, RouteNames.login);
-    }
-  }
-
-  void _nextPage() {
+  void _goToNextPage() {
     if (_currentPage < _items.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
       );
     } else {
-      _completeOnboarding();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, RouteNames.login);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Skip Button Row
+            // ── Top row: page count + skip ─────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
+                  horizontal: 24, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Page count
                   Text(
                     '${_currentPage + 1}/${_items.length}',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
+                    style: AppTextStyles.bodyText.copyWith(
                       fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                  // Skip button
                   TextButton(
-                    onPressed: _completeOnboarding,
+                    onPressed: () => Navigator.pushReplacementNamed(
+                        context, RouteNames.login),
                     child: Text(
-                      AppStrings.skip,
-                      style: AppTextStyles.bodyTextBold.copyWith(
-                        color: AppColors.primaryGreen,
+                      'Skip',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -101,54 +108,54 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
             ),
 
-            // Page View
+            // ── Page view ──────────────────────────────────────────────
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
+                itemCount: _items.length,
                 onPageChanged: (index) {
                   setState(() {
                     _currentPage = index;
                   });
                 },
-                itemCount: _items.length,
                 itemBuilder: (context, index) {
                   return _buildOnboardingItem(_items[index]);
                 },
               ),
             ),
 
-            // Bottom Navigation
+            // ── Bottom: dots + next button ─────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Page Indicators
+                  // Dot indicators
                   Row(
                     children: List.generate(
                       _items.length,
                       (index) => AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: _currentPage == index ? 28 : 10,
-                        height: 10,
+                        width: _currentPage == index ? 24 : 8,
+                        height: 8,
                         decoration: BoxDecoration(
                           color: _currentPage == index
                               ? AppColors.primaryGreen
-                              : AppColors.lightGrey,
+                              : Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
                     ),
                   ),
 
-                  // Next / Get Started Button
+                  // Next / Get Started button
                   GestureDetector(
-                    onTap: _nextPage,
+                    onTap: _goToNextPage,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      width: _currentPage == _items.length - 1 ? 160 : 60,
-                      height: 60,
+                      width: _currentPage == _items.length - 1 ? 160 : 56,
+                      height: 56,
                       decoration: BoxDecoration(
                         color: AppColors.primaryGreen,
                         borderRadius: BorderRadius.circular(30),
@@ -164,15 +171,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         child: _currentPage == _items.length - 1
                             ? Text(
                                 'Get Started',
-                                style: AppTextStyles.bodyTextBold.copyWith(
-                                  color: AppColors.white,
-                                  fontSize: 15,
+                                style: AppTextStyles.bodyText.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               )
                             : const Icon(
                                 Icons.arrow_forward,
-                                color: AppColors.white,
-                                size: 28,
+                                color: Colors.white,
                               ),
                       ),
                     ),
@@ -192,39 +198,37 @@ class _OnboardingPageState extends State<OnboardingPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Icon Container
+          // Icon circle
           Container(
-            width: 220,
-            height: 220,
+            width: 200,
+            height: 200,
             decoration: BoxDecoration(
               color: item.bgColor,
               shape: BoxShape.circle,
             ),
             child: Icon(
               item.icon,
-              size: 110,
+              size: 96,
               color: AppColors.primaryGreen,
             ),
           ),
+
           const SizedBox(height: 48),
 
           // Title
           Text(
             item.title,
-            style: AppTextStyles.heading2.copyWith(
-              fontSize: 24,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTextStyles.heading2.copyWith(fontSize: 24),
             textAlign: TextAlign.center,
           ),
+
           const SizedBox(height: 16),
 
-          // Description
+          // Subtitle
           Text(
-            item.description,
+            item.subtitle,
             style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textSecondary,
-              fontSize: 15,
               height: 1.6,
             ),
             textAlign: TextAlign.center,
@@ -233,18 +237,4 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ),
     );
   }
-}
-
-class OnboardingItem {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color bgColor;
-
-  OnboardingItem({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.bgColor,
-  });
 }
