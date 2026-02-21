@@ -5,18 +5,24 @@ class NotificationEntity extends Equatable {
   final String title;
   final String body;
   final String type; // 'order', 'price_update', 'weather_alert', 'system'
-  final DateTime timestamp;
+  final String priority;
   final bool isRead;
-  final Map<String, dynamic> data;
+  final String? imageUrl;
+  final String? actionUrl;
+  final DateTime createdAt;
+  final String ownerId;
 
   const NotificationEntity({
     required this.id,
     required this.title,
     required this.body,
     required this.type,
-    required this.timestamp,
+    required this.priority,
     this.isRead = false,
-    this.data = const {},
+    this.imageUrl,
+    this.actionUrl,
+    required this.createdAt,
+    required this.ownerId,
   });
 
   NotificationEntity copyWith({
@@ -24,21 +30,38 @@ class NotificationEntity extends Equatable {
     String? title,
     String? body,
     String? type,
-    DateTime? timestamp,
+    String? priority,
     bool? isRead,
-    Map<String, dynamic>? data,
+    String? imageUrl,
+    String? actionUrl,
+    DateTime? createdAt,
+    String? ownerId,
   }) {
     return NotificationEntity(
       id: id ?? this.id,
       title: title ?? this.title,
       body: body ?? this.body,
       type: type ?? this.type,
-      timestamp: timestamp ?? this.timestamp,
+      priority: priority ?? this.priority,
       isRead: isRead ?? this.isRead,
-      data: data ?? this.data,
+      imageUrl: imageUrl ?? this.imageUrl,
+      actionUrl: actionUrl ?? this.actionUrl,
+      createdAt: createdAt ?? this.createdAt,
+      ownerId: ownerId ?? this.ownerId,
     );
   }
 
   @override
-  List<Object?> get props => [id, title, body, type, timestamp, isRead, data];
+  List<Object?> get props => [
+        id,
+        title,
+        body,
+        type,
+        priority,
+        isRead,
+        imageUrl,
+        actionUrl,
+        createdAt,
+        ownerId,
+      ];
 }
