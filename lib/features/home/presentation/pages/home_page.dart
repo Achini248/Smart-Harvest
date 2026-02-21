@@ -259,10 +259,10 @@ class ProfileTabView extends StatelessWidget {
                 children: [
                   const SizedBox(height: 24),
                   // Profile Avatar
-                  CircleAvatar(
+                  const CircleAvatar(
                     radius: 60,
                     backgroundColor: AppColors.primaryGreenLight,
-                    child: const Icon(
+                    child: Icon(
                       Icons.person,
                       size: 60,
                       color: AppColors.primaryGreen,
