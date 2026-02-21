@@ -57,7 +57,7 @@ class _WeatherPageState extends State<WeatherPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline, color: AppColors.error, size: 48),
+                  const Icon(Icons.error_outline, color: AppColors.error, size: 48),
                   const SizedBox(height: 8),
                   Text(state.message),
                   const SizedBox(height: 12),
@@ -91,7 +91,7 @@ class _WeatherPageState extends State<WeatherPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.location_on, color: AppColors.white, size: 16),
+                            const Icon(Icons.location_on, color: AppColors.white, size: 16),
                             const SizedBox(width: 4),
                             Text(w.location,
                                 style: AppTextStyles.bodyText.copyWith(color: AppColors.white)),
@@ -151,7 +151,7 @@ class _WeatherPageState extends State<WeatherPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.tips_and_updates, color: AppColors.warning),
+                            const Icon(Icons.tips_and_updates, color: AppColors.warning),
                             const SizedBox(width: 8),
                             Text('Farming Advice',
                                 style: AppTextStyles.bodyText.copyWith(
