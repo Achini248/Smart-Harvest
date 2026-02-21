@@ -1,4 +1,3 @@
-//update login_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -43,10 +42,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _onGoogleSignInPressed() {
-    context.read<AuthBloc>().add(GoogleSignInEvent());
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                         Container(
                           width: 80,
                           height: 80,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.white,
                             shape: BoxShape.circle,
                           ),
@@ -123,74 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
-                        const SizedBox(height: 32),
-
-                        // Google Sign-In Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: OutlinedButton.icon(
-                            onPressed: _onGoogleSignInPressed,
-                            icon: Image.network(
-                              'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                              height: 24,
-                              width: 24,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(
-                                  Icons.g_mobiledata,
-                                  size: 32,
-                                  color: Colors.red,
-                                );
-                              },
-                            ),
-                            label: Text(
-                              'Continue with Google',
-                              style: AppTextStyles.bodyTextBold.copyWith(
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                color: AppColors.lightGrey,
-                                width: 1.5,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              backgroundColor: AppColors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-
-                        // OR Divider
-                        Row(
-                          children: [
-                            const Expanded(
-                              child: Divider(
-                                color: AppColors.lightGrey,
-                                thickness: 1,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                'OR',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const Expanded(
-                              child: Divider(
-                                color: AppColors.lightGrey,
-                                thickness: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 40),
 
                         // Email Field
                         CustomTextField(
@@ -265,12 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             TextButton(
                               onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Forgot password coming soon!'),
-                                    backgroundColor: AppColors.primaryGreen,
-                                  ),
-                                );
+                                // Navigate to forgot password
                               },
                               child: Text(
                                 AppStrings.forgotPassword,
@@ -312,7 +235,6 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
