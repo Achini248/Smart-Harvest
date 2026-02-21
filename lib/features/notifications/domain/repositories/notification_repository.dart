@@ -1,20 +1,16 @@
+import '../../../../core/errors/failures.dart';
 import '../entities/notification.dart';
 
-/// Abstract repository interface for notification operations
-/// Pure domain layer - no external dependencies
 abstract class NotificationRepository {
-  /// Get all notifications for current user
-  Future<List<NotificationEntity>> getNotifications();
+  /// Returns List<NotificationEntity> or null if error occurs
+  Future<List<NotificationEntity>?> getNotifications();
   
-  /// Mark single notification as read
-  Future<void> markAsRead(String id);
+  /// Returns updated notification or null if error
+  Future<NotificationEntity?> markAsRead(String id);
   
-  /// Mark all notifications as read
-  Future<void> markAllAsRead();
+  /// Returns true if deleted successfully, false otherwise
+  Future<bool> deleteNotification(String id);
   
-  /// Get count of unread notifications
-  Future<int> getUnreadCount();
-  
-  /// Real-time stream of notifications (optional)
-  Stream<List<NotificationEntity>>? watchNotifications();
+  /// Stream that emits List<NotificationEntity> or null
+  Stream<List<NotificationEntity>?> watchNotifications();
 }
