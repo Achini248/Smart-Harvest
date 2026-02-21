@@ -1,81 +1,79 @@
-// lib/features/authentication/data/datasources/auth_remote_datasource.dart
-
-import '../../domain/entities/user.dart';
+//auth_remote_datasource.dart
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<User?> getCurrentUser();
-  Future<User> login(String email, String password);
-  Future<User> register(String email, String password, String phone);
+  Future<UserModel> login(String email, String password);
+  Future<UserModel> register(String email, String password, String phoneNo);
   Future<void> logout();
-  Future<String> sendOtp(String phoneNumber);
-  Future<User> verifyOtp(String verificationId, String otpCode);
+  Future<UserModel?> getCurrentUser();
 }
 
-// DUMMY implementation — replace with real Firebase calls later
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final firebase_auth.FirebaseAuth firebaseAuth;
+
+  AuthRemoteDataSourceImpl({required this.firebaseAuth});
+
   @override
-  Future<User?> getCurrentUser() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    return null; // No user logged in initially
+  Future<UserModel> login(String email, String password) async {
+    try {
+      final credential = await firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (credential.user == null) {
+        throw Exception('Login failed');
+      }
+
+      return UserModel(
+        id: credential.user!.uid,
+        email: credential.user!.email!,
+        name: credential.user!.displayName,
+        phoneNo: credential.user!.phoneNumber,
+      );
+    } catch (e) {
+      throw Exception('Login failed: ${e.toString()}');
+    }
   }
 
   @override
-  Future<User> login(String email, String password) async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    // Dummy validation
-    if (email.isEmpty || password.isEmpty) {
-      throw Exception('Email and password are required');
-    }
-    if (password.length < 6) {
-      throw Exception('wrong-password');
-    }
-    return UserModel(
-      id: 'user_${email.hashCode}',
-      email: email,
-      phone: '',
-    );
-  }
+  Future<UserModel> register(String email, String password, String phoneNo) async {
+    try {
+      final credential = await firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-  @override
-  Future<User> register(String email, String password, String phone) async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (email.isEmpty || password.isEmpty) {
-      throw Exception('All fields are required');
+      if (credential.user == null) {
+        throw Exception('Registration failed');
+      }
+
+      return UserModel(
+        id: credential.user!.uid,
+        email: email,
+        phoneNo: phoneNo,
+      );
+    } catch (e) {
+      throw Exception('Registration failed: ${e.toString()}');
     }
-    return UserModel(
-      id: 'user_${email.hashCode}',
-      email: email,
-      phone: phone,
-    );
   }
 
   @override
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await firebaseAuth.signOut();
   }
 
   @override
-  Future<String> sendOtp(String phoneNumber) async {
-    await Future.delayed(const Duration(milliseconds: 1000));
-    if (phoneNumber.isEmpty) {
-      throw Exception('invalid-phone-number');
-    }
-    // Return a dummy verificationId
-    return 'dummy_verification_id_${phoneNumber.hashCode}';
-  }
+  Future<UserModel?> getCurrentUser() async {
+    final user = firebaseAuth.currentUser;
+    if (user == null) return null;
 
-  @override
-  Future<User> verifyOtp(String verificationId, String otpCode) async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    // Dummy: accept "123456" as the valid OTP
-    if (otpCode != '123456') {
-      throw Exception('invalid-verification-code');
-    }
     return UserModel(
-      id: 'verified_user',
-      email: 'user@smartharvest.lk',
-      phone: '',
+      id: user.uid,
+      email: user.email!,
+      name: user.displayName,
+      phoneNo: user.phoneNumber,
     );
   }
 }
