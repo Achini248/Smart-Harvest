@@ -3,23 +3,33 @@ import 'package:equatable/equatable.dart';
 class DashboardStats extends Equatable {
   final int totalFarmers;
   final int totalCrops;
-  final int activeOrders;
+  final int totalOrders;
   final double totalRevenue;
-  final double surplusPercentage;
-  final double shortagePercentage;
+  final int surplusRegions;
+  final int shortageRegions;
+  final double nationalSurplusIndex;
+  final Map<String, dynamic> cropDistribution;
 
   const DashboardStats({
     required this.totalFarmers,
     required this.totalCrops,
-    required this.activeOrders,
+    required this.totalOrders,
     required this.totalRevenue,
-    required this.surplusPercentage,
-    required this.shortagePercentage,
+    required this.surplusRegions,
+    required this.shortageRegions,
+    required this.nationalSurplusIndex,
+    required this.cropDistribution,
   });
 
   @override
   List<Object?> get props => [
-    totalFarmers, totalCrops, activeOrders, totalRevenue,
-    surplusPercentage, shortagePercentage
-  ];
+        totalFarmers,
+        totalCrops,
+        totalOrders,
+        totalRevenue,
+        surplusRegions,
+        shortageRegions,
+        nationalSurplusIndex,
+        cropDistribution,
+      ];
 }
