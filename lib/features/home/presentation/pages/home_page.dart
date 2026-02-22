@@ -259,10 +259,10 @@ class ProfileTabView extends StatelessWidget {
                 children: [
                   const SizedBox(height: 24),
                   // Profile Avatar
-                  CircleAvatar(
+                  const CircleAvatar(
                     radius: 60,
                     backgroundColor: AppColors.primaryGreenLight,
-                    child: const Icon(
+                    child: Icon(
                       Icons.person,
                       size: 60,
                       color: AppColors.primaryGreen,
@@ -379,8 +379,8 @@ class ProfileTabView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
                       child: Text(
                         'Cancel',
                         style: AppTextStyles.bodyTextBold,

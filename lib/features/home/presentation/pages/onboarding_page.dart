@@ -82,10 +82,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       width: _currentPage == index ? 32 : 12,
                       height: 12,
                       decoration: BoxDecoration(
+
                         color: _currentPage == index
                             ? AppColors.primaryGreen
                             : AppColors.lightGrey,
                         borderRadius: BorderRadius.circular(6),
+
+
                       ),
                     ),
                   ),
