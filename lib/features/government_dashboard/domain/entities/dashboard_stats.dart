@@ -18,7 +18,7 @@ class DashboardStats extends Equatable {
     required this.surplusRegions,
     required this.shortageRegions,
     required this.nationalSurplusIndex,
-    required this.cropDistribution,
+    this.cropDistribution = const {},
   });
 
   @override
