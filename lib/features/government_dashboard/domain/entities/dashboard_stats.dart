@@ -33,3 +33,4 @@ class DashboardStats extends Equatable {
         cropDistribution,
       ];
 }
+
