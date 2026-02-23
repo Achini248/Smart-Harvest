@@ -8,7 +8,7 @@ abstract class CropState extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Initial state before anything loads.
+
 class CropInitialState extends CropState {
   const CropInitialState();
 }
