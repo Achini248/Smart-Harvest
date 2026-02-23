@@ -9,7 +9,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({required this.authRepository}) : super(AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
-    on<GoogleSignInEvent>(_onGoogleSignIn); // NEW
     on<LogoutEvent>(_onLogout);
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
   }
@@ -38,33 +37,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  // NEW: Google Sign-In Handler
-  Future<void> _onGoogleSignIn(
-    GoogleSignInEvent event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final user = await authRepository.signInWithGoogle();
-      emit(Authenticated(user: user));
+      await authRepository.logout();
+      emit(Unauthenticated());
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
   }
 
-  Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
-    await authRepository.logout();
-    emit(Unauthenticated());
-  }
-
   Future<void> _onCheckAuthStatus(
-    CheckAuthStatusEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    final user = await authRepository.getCurrentUser();
-    if (user != null) {
-      emit(Authenticated(user: user));
-    } else {
+      CheckAuthStatusEvent event, Emitter<AuthState> emit) async {
+    try {
+      final user = await authRepository.getCurrentUser();
+      if (user != null) {
+        emit(Authenticated(user: user));
+      } else {
+        emit(Unauthenticated());
+      }
+    } catch (e) {
       emit(Unauthenticated());
     }
   }

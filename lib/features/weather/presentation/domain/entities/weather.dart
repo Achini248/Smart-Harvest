@@ -37,4 +37,3 @@ class WeatherForecast extends Equatable {
   @override
   List<Object?> get props => [day, highC, lowC, condition];
 }
-

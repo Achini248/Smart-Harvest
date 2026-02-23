@@ -32,9 +32,6 @@ class RegisterEvent extends AuthEvent {
   List<Object?> get props => [email, password, phoneNo];
 }
 
-// NEW: Google Sign-In Event
-class GoogleSignInEvent extends AuthEvent {}
-
 class LogoutEvent extends AuthEvent {}
 
 class CheckAuthStatusEvent extends AuthEvent {}

@@ -1,3 +1,4 @@
+//update auth_repository_impl.dart
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
@@ -16,13 +17,6 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User> register(String email, String password, String phoneNo) async {
     final userModel = await remoteDataSource.register(email, password, phoneNo);
-    return userModel.toEntity();
-  }
-
-  // NEW: Google Sign-In
-  @override
-  Future<User> signInWithGoogle() async {
-    final userModel = await remoteDataSource.signInWithGoogle();
     return userModel.toEntity();
   }
 
