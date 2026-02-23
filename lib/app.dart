@@ -1,21 +1,24 @@
-//
-import 'package:flutter/material.dart';
-import 'core/theme/app_theme.dart';
-import 'config/routes/app_router.dart';
-import 'config/routes/route_names.dart';
-import 'core/constants/app_strings.dart';
+// lib/app.dart
 
 class SmartHarvestApp extends StatelessWidget {
-  const SmartHarvestApp({super.key});
+  final AppRouter appRouter;
+
+  const SmartHarvestApp({super.key, required this.appRouter});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppStrings.appName,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      initialRoute: RouteNames.splash,
-      onGenerateRoute: AppRouter.generateRoute,
+    // ...
+    return MultiBlocProvider(
+      providers: [
+        // AuthBloc etc.
+      ],
+      child: MaterialApp(
+        title: 'Smart Harvest',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme, // if you have AppTheme
+        onGenerateRoute: appRouter.onGenerateRoute,
+        initialRoute: RouteNames.splash,
+      ),
     );
   }
 }
