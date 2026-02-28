@@ -1,12 +1,18 @@
-
-
-import '../entities/user.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../core/error/failures.dart';
+import '../entities/user_entity.dart';
 
 abstract class AuthRepository {
-  Future<User?> getCurrentUser();
-  Future<User> login(String email, String password);
-  Future<User> register(String email, String password, String phone);
-  Future<void> logout();
-  Future<String> sendOtp(String phoneNumber);
-  Future<User> verifyOtp(String verificationId, String otpCode);
+  Future<Either<Failure, UserEntity>> login({
+    required String email,
+    required String password,
+  });
+
+  Future<Either<Failure, UserEntity>> register({
+    required String name,
+    required String email,
+    required String password,
+  });
+
+  Future<Either<Failure, void>> logout();
 }
