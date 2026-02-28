@@ -14,9 +14,11 @@ import '../../features/home/presentation/pages/onboarding_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 
 // Crop management feature
-import '../../features/crop_management/presentation/pages/my_crops_page.dart';
+
 import '../../features/crop_management/presentation/pages/add_crop_page.dart';
-import '../../features/crop_management/presentation/pages/crop_details_page.dart';
+
+import '../../features/crop_management/presentation/pages/crops_list_page.dart';
+import '../../features/crop_management/presentation/pages/crop_detail_page.dart';
 
 // Marketplace feature
 import '../../features/marketplace/presentation/pages/marketplace_home_page.dart';

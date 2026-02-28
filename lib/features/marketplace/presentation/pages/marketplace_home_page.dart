@@ -8,7 +8,7 @@ import '../bloc/marketplace_bloc.dart';
 import '../bloc/marketplace_event.dart';
 import '../bloc/marketplace_state.dart';
 import '../widgets/product_card.dart';
-import '../../domain/entities/seller.dart';
+import '../../domain/entities/product_entity.dart';
 
 class MarketplaceHomePage extends StatefulWidget {
   const MarketplaceHomePage({super.key});
@@ -83,7 +83,6 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Handle bar
               Center(
                 child: Container(
                   width: 40,
@@ -105,13 +104,11 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
                     color: AppColors.textSecondary, fontSize: 13),
               ),
               const SizedBox(height: 20),
-
               TextFormField(
                 controller: qtyCtrl,
                 keyboardType: TextInputType.number,
-                decoration: _dec(
-                    label: 'Quantity (${product.unit})',
-                    icon: Icons.straighten),
+                decoration:
+                    _dec(label: 'Quantity (${product.unit})', icon: Icons.straighten),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Required';
                   final q = double.tryParse(v);
@@ -123,15 +120,12 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
                 },
               ),
               const SizedBox(height: 12),
-
               TextFormField(
                 controller: notesCtrl,
                 maxLines: 2,
-                decoration:
-                    _dec(label: 'Notes (optional)', icon: Icons.notes),
+                decoration: _dec(label: 'Notes (optional)', icon: Icons.notes),
               ),
               const SizedBox(height: 20),
-
               BlocConsumer<MarketplaceBloc, MarketplaceState>(
                 listener: (ctx, state) {
                   if (state is OrderPlacedState) {
@@ -154,5 +148,76 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
                   }
                 },
                 builder: (ctx, state) {
-                  final loading =
-                      state is MarketplaceOperationLoadingState;
+                  final loading = state is MarketplaceOperationLoadingState;
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: loading
+                          ? null
+                          : () {
+                              if (formKey.currentState!.validate()) {
+                                context.read<MarketplaceBloc>().add(
+                                      PlaceOrderEvent(
+                                        productId: product.id,
+                                        quantity:
+                                            double.parse(qtyCtrl.text.trim()),
+                                        notes: notesCtrl.text.trim(),
+                                      ),
+                                    );
+                              }
+                            },
+                      child: loading
+                          ? const CircularProgressIndicator()
+                          : const Text('Place Order'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _dec({required String label, required IconData icon}) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Marketplace'),
+      ),
+      body: BlocBuilder<MarketplaceBloc, MarketplaceState>(
+        builder: (context, state) {
+          if (state is MarketplaceLoadingState) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is MarketplaceLoadedState) {
+            final products = state.products;
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return ProductCard(
+                  product: product,
+                  onTap: () => _showOrderDialog(context, product),
+                );
+              },
+            );
+          } else if (state is MarketplaceErrorState) {
+            return Center(child: Text(state.message));
+          }
+          return const SizedBox();
+        },
+      ),
+    );
+  }
+}
