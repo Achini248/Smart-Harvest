@@ -7,7 +7,7 @@ import '../../data/repositories/analytics_repository_impl.dart';
 import '../../domain/usecases/get_analytics_usecase.dart';
 import '../bloc/analytics_bloc.dart';
 import '../bloc/analytics_event.dart';
-import ../bloc/analytics_state.dart';
+import '../bloc/analytics_state.dart';
 import '../widgets/chart_widget.dart';
 
 class AnalyticsPage extends StatelessWidget {
