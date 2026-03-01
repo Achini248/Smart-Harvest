@@ -18,7 +18,7 @@ class AuthRepositoryImpl implements AuthRepository {
   ) async {
     try {
       final user =
-          await remoteDataSource.login(email: email, password: password);
+          final userModel = await remoteDataSource.login(email, password);
       return Right(user);
     } on AuthException catch (e) {
       return Left(AuthFailure(message: e.message));
