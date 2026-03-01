@@ -1,7 +1,6 @@
-// lib/features/market_prices/domain/entities/price.dart
 import 'package:equatable/equatable.dart';
 
-class Price extends Equatable {
+class PriceEntity extends Equatable { // නම PriceEntity ලෙස වෙනස් කළා
   final String id;
   final String productName;
   final double pricePerUnit;
@@ -9,7 +8,7 @@ class Price extends Equatable {
   final double changePercent; // compared to yesterday
   final DateTime date;
 
-  const Price({
+  const PriceEntity({
     required this.id,
     required this.productName,
     required this.pricePerUnit,
