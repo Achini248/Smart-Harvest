@@ -8,7 +8,7 @@ class GetPriceTrendsUseCase {
   const GetPriceTrendsUseCase(this.repository);
 
   // Return type එක Map එකක් විදිහට වෙනස් කළා
-  Future<Either<Failure, Map<DateTime, double>>> call(String productName) async {
-    return await repository.getPriceTrends(productName);
-  }
+ Future<Either<Failure, Map<DateTime, double>>> call(String productName) {
+  return repository.getPriceTrends(productName);
+}
 }
