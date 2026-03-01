@@ -30,15 +30,14 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
       (failure) {
         emit(state.copyWith(
           isLoading: false, 
-          errorMessage: 'Failed to load market prices'
+          errorMessage: 'මිල ගණන් ලබා ගැනීමට අපොහොසත් විය.'
         ));
       },
-      (prices) {
+      (pricesList) {
         emit(state.copyWith(
           isLoading: false,
-          allPrices: prices,
-          filteredPrices: prices,
-          errorMessage: prices.isEmpty ? 'No prices available today.' : null,
+          allPrices: pricesList,
+          filteredPrices: pricesList,
         ));
       },
     );
@@ -48,14 +47,11 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
     LoadPriceTrendsEvent event,
     Emitter<PriceState> emit,
   ) async {
-    // Trend එක load වන බව පෙන්වීමට isLoading true කළ හැක
     final result = await getPriceTrends(event.productName);
     
     result.fold(
       (failure) {
-        emit(state.copyWith(
-          errorMessage: 'Could not load trends for ${event.productName}'
-        ));
+        emit(state.copyWith(errorMessage: 'දත්ත ලබා ගැනීමට නොහැක.'));
       },
       (trendsMap) {
         emit(state.copyWith(
@@ -66,22 +62,15 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
     );
   }
 
-  void _onSearch(
-    SearchPricesEvent event,
-    Emitter<PriceState> emit,
-  ) {
+  void _onSearch(SearchPricesEvent event, Emitter<PriceState> emit) {
     final query = event.query.trim().toLowerCase();
-    
     if (query.isEmpty) {
       emit(state.copyWith(filteredPrices: state.allPrices));
       return;
     }
-
-    // List එක filter කිරීම
     final filtered = state.allPrices
-        .where((PriceEntity p) => p.productName.toLowerCase().contains(query))
+        .where((p) => p.productName.toLowerCase().contains(query))
         .toList();
-        
     emit(state.copyWith(filteredPrices: filtered));
   }
 }
