@@ -1,23 +1,22 @@
-import '../../domain/entities/price.dart';
+import 'package:equatable/equatable.dart';
 
-class PriceModel extends PriceEntity { // 'Price' වෙනුවට 'PriceEntity'
-  const PriceModel({
-    required super.id,
-    required super.productName,
-    required super.pricePerUnit,
-    required super.unit,
-    required super.changePercent,
-    required super.date,
+class PriceEntity extends Equatable {
+  final String id;
+  final String productName;
+  final double pricePerUnit;
+  final String unit;
+  final double changePercent;
+  final DateTime date;
+
+  const PriceEntity({
+    required this.id,
+    required this.productName,
+    required this.pricePerUnit,
+    required this.unit,
+    required this.changePercent,
+    required this.date,
   });
 
-  factory PriceModel.fromJson(Map<String, dynamic> json) {
-    return PriceModel(
-      id: json['id'],
-      productName: json['productName'],
-      pricePerUnit: (json['pricePerUnit'] as num).toDouble(),
-      unit: json['unit'],
-      changePercent: (json['changePercent'] as num).toDouble(),
-      date: DateTime.parse(json['date']),
-    );
-  }
+  @override
+  List<Object?> get props => [id, productName, pricePerUnit, unit, changePercent, date];
 }
