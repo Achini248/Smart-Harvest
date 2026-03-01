@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/order.dart'; // Entity නම නිවැරදි කළා
+import '../../domain/entities/order.dart'; 
 import '../bloc/marketplace_bloc.dart';
 import '../bloc/marketplace_event.dart';
 import '../bloc/marketplace_state.dart';
@@ -16,7 +16,6 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
   @override
   void initState() {
     super.initState();
-    // මුලින්ම products load කරගන්නවා
     context.read<MarketplaceBloc>().add(const LoadProductsEvent());
   }
 
@@ -63,19 +62,11 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
                       title: Text(product.name),
-                      subtitle: Text('Rs. ${product.price}'),
+                      // මෙතන 'price' වෙනුවට 'unitPrice' ලෙස නිවැරදි කළා
+                      subtitle: Text('Rs. ${product.unitPrice}'), 
                       trailing: ElevatedButton(
                         onPressed: () {
-                          // Order එකක් ප්ලේස් කරන ආකාරය
-                          // මෙහි Order class එකේ parameters ඔබේ Entity එකට අනුව වෙනස් විය හැක
-                          /*
-                          final newOrder = Order(
-                            id: DateTime.now().toString(),
-                            productName: product.name,
-                            price: product.price,
-                          );
-                          context.read<MarketplaceBloc>().add(PlaceOrderEvent(newOrder));
-                          */
+                          // Order logic goes here
                         },
                         child: const Text('Buy'),
                       ),
@@ -85,12 +76,7 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
               ),
             );
           }
-
-          if (state is MarketplaceEmptyState) {
-            return Center(child: Text(state.message));
-          }
-
-          return const Center(child: Text('Start exploring the marketplace!'));
+          return const Center(child: Text('Start exploring!'));
         },
       ),
     );
