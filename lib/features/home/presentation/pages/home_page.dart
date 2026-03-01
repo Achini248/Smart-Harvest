@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/text_styles.dart';
@@ -20,11 +21,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomeTabView(),
-    const MarketplaceTabView(),
-    const CropsTabView(),
-    const ProfileTabView(),
+  final List<Widget> _pages = const [
+    HomeTabView(),
+    MarketplaceTabView(),
+    CropsTabView(),
+    ProfileTabView(),
   ];
 
   @override
@@ -58,7 +59,10 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+// =======================
 // Home Tab
+// =======================
+
 class HomeTabView extends StatelessWidget {
   const HomeTabView({super.key});
 
@@ -75,7 +79,10 @@ class HomeTabView extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [AppColors.primaryGreen, AppColors.primaryGreenLight],
+                  colors: [
+                    AppColors.primaryGreen,
+                    AppColors.primaryGreenLight,
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -137,7 +144,8 @@ class HomeTabView extends StatelessWidget {
                   'Market Prices',
                   Icons.trending_up,
                   () {
-                    Navigator.pushNamed(context, RouteNames.marketPrices);
+                    Navigator.pushNamed(
+                        context, RouteNames.marketPrices);
                   },
                 ),
                 _buildQuickActionCard(
@@ -153,7 +161,8 @@ class HomeTabView extends StatelessWidget {
                   'Messages',
                   Icons.message,
                   () {
-                    Navigator.pushNamed(context, RouteNames.messagesList);
+                    Navigator.pushNamed(
+                        context, RouteNames.messagesList);
                   },
                 ),
               ],
@@ -167,8 +176,10 @@ class HomeTabView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildActivityItem('New order received', '2 hours ago'),
-            _buildActivityItem('Price update for tomatoes', '5 hours ago'),
-            _buildActivityItem('Weather alert for your area', '1 day ago'),
+            _buildActivityItem(
+                'Price update for tomatoes', '5 hours ago'),
+            _buildActivityItem(
+                'Weather alert for your area', '1 day ago'),
           ],
         ),
       ),
@@ -210,7 +221,8 @@ class HomeTabView extends StatelessWidget {
       child: ListTile(
         leading: const CircleAvatar(
           backgroundColor: AppColors.primaryGreenLight,
-          child: Icon(Icons.notifications, color: AppColors.primaryGreen),
+          child:
+              Icon(Icons.notifications, color: AppColors.primaryGreen),
         ),
         title: Text(title, style: AppTextStyles.bodyText),
         subtitle: Text(time, style: AppTextStyles.caption),
@@ -219,7 +231,10 @@ class HomeTabView extends StatelessWidget {
   }
 }
 
+// =======================
 // Marketplace Tab
+// =======================
+
 class MarketplaceTabView extends StatelessWidget {
   const MarketplaceTabView({super.key});
 
@@ -231,7 +246,10 @@ class MarketplaceTabView extends StatelessWidget {
   }
 }
 
+// =======================
 // Crops Tab
+// =======================
+
 class CropsTabView extends StatelessWidget {
   const CropsTabView({super.key});
 
@@ -243,7 +261,10 @@ class CropsTabView extends StatelessWidget {
   }
 }
 
+// =======================
 // Profile Tab
+// =======================
+
 class ProfileTabView extends StatelessWidget {
   const ProfileTabView({super.key});
 
@@ -288,7 +309,8 @@ class ProfileTabView extends StatelessWidget {
                     'Profile Settings',
                     Icons.person_outline,
                     () {
-                      Navigator.pushNamed(context, RouteNames.profileSettings);
+                      Navigator.pushNamed(
+                          context, RouteNames.profileSettings);
                     },
                   ),
                   _buildProfileOption(
@@ -296,7 +318,8 @@ class ProfileTabView extends StatelessWidget {
                     'Account Settings',
                     Icons.settings_outlined,
                     () {
-                      Navigator.pushNamed(context, RouteNames.accountSettings);
+                      Navigator.pushNamed(
+                          context, RouteNames.accountSettings);
                     },
                   ),
                   _buildProfileOption(
@@ -304,7 +327,8 @@ class ProfileTabView extends StatelessWidget {
                     'Help & Support',
                     Icons.help_outline,
                     () {
-                      Navigator.pushNamed(context, RouteNames.helpSupport);
+                      Navigator.pushNamed(
+                          context, RouteNames.helpSupport);
                     },
                   ),
                   _buildProfileOption(
@@ -343,7 +367,9 @@ class ProfileTabView extends StatelessWidget {
         title: Text(
           title,
           style: AppTextStyles.bodyTextBold.copyWith(
-            color: isDestructive ? AppColors.error : AppColors.textPrimary,
+            color: isDestructive
+                ? AppColors.error
+                : AppColors.textPrimary,
           ),
         ),
         trailing: const Icon(Icons.chevron_right),
@@ -402,7 +428,8 @@ class ProfileTabView extends StatelessWidget {
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 12),
                       child: Text(
                         'Log Out',
                         style: AppTextStyles.bodyTextBold.copyWith(
