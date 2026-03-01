@@ -1,4 +1,3 @@
-// lib/features/market_prices/data/repositories/price_repository_impl.dart
 import '../../domain/entities/price.dart';
 import '../../domain/repositories/price_repository.dart';
 import '../datasources/price_remote_datasource.dart';
@@ -9,12 +8,13 @@ class PriceRepositoryImpl implements PriceRepository {
   PriceRepositoryImpl({required this.remoteDataSource});
 
   @override
+  // මෙතන PriceEntity නම නිවැරදිව තියෙනවාද බලන්න (domain/entities/price.dart බලන්න)
   Future<List<PriceEntity>> getDailyPrices() async {
     try {
       final models = await remoteDataSource.getDailyPrices();
+      // Models ටික Entity list එකක් විදිහට return කරනවා
       return models;
     } catch (e) {
-      // In a real app you might throw domain-specific exceptions.
       rethrow;
     }
   }
