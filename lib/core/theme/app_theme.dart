@@ -1,68 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../constants/app_colors.dart';
-import 'text_styles.dart';
+
+class AppColors {
+  AppColors._();
+
+  static const Color primary = Color(0xFF7BA53D);
+  static const Color background = Color(0xFFF7F7F7);
+  static const Color surface = Colors.white;
+  static const Color divider = Color(0xFFEEEEEE);
+}
 
 class AppTheme {
-  static ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
-    primaryColor: AppColors.primaryGreen,
-    scaffoldBackgroundColor: AppColors.white,
-    
-    colorScheme: const ColorScheme.light(
-      primary: AppColors.primaryGreen,
-      secondary: AppColors.primaryGreenLight,
-      error: AppColors.error,
-      background: AppColors.backgroundLight,
-      surface: AppColors.cardBackground,
-    ),
-    
-    textTheme: GoogleFonts.poppinsTextTheme(),
-    
-    appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.white,
-      elevation: 0,
-      iconTheme: const IconThemeData(color: AppColors.textPrimary),
-      titleTextStyle: AppTextStyles.heading2,
-    ),
-    
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryGreen,
-        foregroundColor: AppColors.white,
-        minimumSize: const Size(double.infinity, 56),
+  AppTheme._();
+
+  static ThemeData get lightTheme {
+    return ThemeData(
+      primaryColor: AppColors.primary,
+      scaffoldBackgroundColor: AppColors.background,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        primary: AppColors.primary,
+      ),
+      cardTheme: const CardTheme(
+        color: Colors.white,
+        elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
-        textStyle: AppTextStyles.buttonText,
       ),
-    ),
-    
-    inputDecorationTheme: InputDecorationTheme(
-      filled: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.lightGrey),
-      ),
-      enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.lightGrey),
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.primaryGreen, width: 2),
-      ),
-      errorBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.error),
-      ),
-      hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textHint),
-    ),
-    
-    cardTheme: CardTheme(
-      color: AppColors.cardBackground,
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-    ),
-  );
+      useMaterial3: false,
+    );
+  }
 }
