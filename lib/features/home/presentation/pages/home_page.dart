@@ -145,7 +145,7 @@ class HomeTabView extends StatelessWidget {
                   Icons.trending_up,
                   () {
                     Navigator.pushNamed(
-                        context, RouteNames.marketPrices);
+                        context, RouteNames.dailyMarketPrices);
                   },
                 ),
                 _buildQuickActionCard(
@@ -153,7 +153,7 @@ class HomeTabView extends StatelessWidget {
                   'Weather',
                   Icons.wb_sunny,
                   () {
-                    Navigator.pushNamed(context, RouteNames.weather);
+                    Navigator.pushNamed(context, RouteNames.weatherOverview);
                   },
                 ),
                 _buildQuickActionCard(
