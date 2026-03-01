@@ -42,7 +42,7 @@ class DrawerMenu extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(
-                          context, RouteNames.cropsList);
+                          context, RouteNames.myCrops);
                     },
                   ),
                   _DrawerItem(
@@ -51,7 +51,7 @@ class DrawerMenu extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(
-                          context, RouteNames.marketPrices);
+                          context, RouteNames.dailymarketPrices);
                     },
                   ),
                   _DrawerItem(
@@ -60,7 +60,7 @@ class DrawerMenu extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(
-                          context, RouteNames.weather);
+                          context, RouteNames.weatherOverview);
                     },
                   ),
                   _DrawerItem(
