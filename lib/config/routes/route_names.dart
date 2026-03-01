@@ -12,19 +12,20 @@ class RouteNames {
   static const String otpVerification = '/otp-verification';
   static const String profileSettings = '/profile-settings';
 
-  // Crop management
-  static const String cropsList = '/crops-list';
-  static const String cropDetail = '/crop-detail';
+  // Crop management (AppRouter එකේ තියෙන නම් වලට ගැලපෙන්න හැදුවා)
+  static const String myCrops = '/my-crops';      // 'cropsList' වෙනුවට
+  static const String addCrop = '/add-crop';      // අලුතින් එක් කළා
+  static const String cropDetails = '/crop-detail'; // 'cropDetail' වෙනුවට
   static const String editCrop = '/edit-crop';
 
   // Marketplace & prices
   static const String marketplaceHome = '/marketplace';
   static const String myOrders = '/my-orders';
   static const String orderInbox = '/order-inbox';
-  static const String marketPrices = '/market-prices';
+  static const String dailyMarketPrices = '/market-prices'; // 'marketPrices' වෙනුවට
 
   // Weather
-  static const String weather = '/weather';
+  static const String weatherOverview = '/weather'; // 'weather' වෙනුවට
 
   // Notifications
   static const String notifications = '/notifications';
