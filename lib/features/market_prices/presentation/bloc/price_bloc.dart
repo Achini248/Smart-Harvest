@@ -1,4 +1,3 @@
-// lib/features/market_prices/presentation/bloc/price_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/get_daily_prices_usecase.dart';
@@ -16,17 +15,21 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
   }) : super(PriceState.initial()) {
     on<LoadDailyPricesEvent>(_onLoadDailyPrices);
     on<LoadPriceTrendsEvent>(_onLoadTrends);
+    on<SearchPricesEvent>(_onSearch);
   }
 
   Future<void> _onLoadDailyPrices(
-      LoadDailyPricesEvent event, Emitter<PriceState> emit) async {
+    LoadDailyPricesEvent event,
+    Emitter<PriceState> emit,
+  ) async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
-      final list = await getDailyPrices();
+      final prices = await getDailyPrices();
       emit(state.copyWith(
         isLoading: false,
-        prices: list,
-        errorMessage: list.isEmpty ? 'No prices available today.' : null,
+        allPrices: prices,
+        filteredPrices: prices,
+        errorMessage: prices.isEmpty ? 'No prices available today.' : null,
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -37,13 +40,15 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
   }
 
   Future<void> _onLoadTrends(
-      LoadPriceTrendsEvent event, Emitter<PriceState> emit) async {
+    LoadPriceTrendsEvent event,
+    Emitter<PriceState> emit,
+  ) async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
-      final data = await getPriceTrends(event.productName);
+      final trends = await getPriceTrends(event.productName);
       emit(state.copyWith(
         isLoading: false,
-        trends: data,
+        trends: trends,
         selectedProduct: event.productName,
       ));
     } catch (e) {
@@ -52,5 +57,20 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
         errorMessage: 'Failed to load price trends: $e',
       ));
     }
+  }
+
+  Future<void> _onSearch(
+    SearchPricesEvent event,
+    Emitter<PriceState> emit,
+  ) async {
+    final query = event.query.trim().toLowerCase();
+    if (query.isEmpty) {
+      emit(state.copyWith(filteredPrices: state.allPrices));
+      return;
+    }
+    final filtered = state.allPrices
+        .where((p) => p.productName.toLowerCase().contains(query))
+        .toList();
+    emit(state.copyWith(filteredPrices: filtered));
   }
 }

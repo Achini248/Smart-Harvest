@@ -56,7 +56,8 @@ class PriceRemoteDataSourceImpl implements PriceRemoteDataSource {
 
     final today = DateTime.now();
     final Map<DateTime, double> data = {};
-    double base = 200 + _random.nextInt(200); // start
+    double base = 200.0 + _random.nextInt(200); // start
+
 
     for (int i = 5; i >= 0; i--) {
       final day = DateTime(today.year, today.month, today.day - i);
