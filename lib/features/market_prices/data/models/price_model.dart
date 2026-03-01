@@ -1,7 +1,6 @@
-// lib/features/market_prices/data/models/price_model.dart
 import '../../domain/entities/price.dart';
 
-class PriceModel extends Price {
+class PriceModel extends PriceEntity {
   const PriceModel({
     required super.id,
     required super.productName,
@@ -13,12 +12,12 @@ class PriceModel extends Price {
 
   factory PriceModel.fromJson(Map<String, dynamic> json) {
     return PriceModel(
-      id: json['id'] as String,
-      productName: json['productName'] as String,
+      id: json['id'],
+      productName: json['productName'],
       pricePerUnit: (json['pricePerUnit'] as num).toDouble(),
-      unit: json['unit'] as String,
+      unit: json['unit'],
       changePercent: (json['changePercent'] as num).toDouble(),
-      date: DateTime.parse(json['date'] as String),
+      date: DateTime.parse(json['date']),
     );
   }
 
@@ -31,16 +30,5 @@ class PriceModel extends Price {
       'changePercent': changePercent,
       'date': date.toIso8601String(),
     };
-  }
-
-  factory PriceModel.fromEntity(Price price) {
-    return PriceModel(
-      id: price.id,
-      productName: price.productName,
-      pricePerUnit: price.pricePerUnit,
-      unit: price.unit,
-      changePercent: price.changePercent,
-      date: price.date,
-    );
   }
 }
