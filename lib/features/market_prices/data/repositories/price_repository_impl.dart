@@ -9,7 +9,7 @@ class PriceRepositoryImpl implements PriceRepository {
   PriceRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<Price>> getDailyPrices() async {
+  Future<List<PriceEntity>> getDailyPrices() async {
     try {
       final models = await remoteDataSource.getDailyPrices();
       return models;
