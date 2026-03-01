@@ -17,8 +17,8 @@ class AuthRepositoryImpl implements AuthRepository {
     String password,
   ) async {
     try {
-      final user =
-          final userModel = await remoteDataSource.login(email, password);
+      // මෙතන තිබුණු double final error එක හරිගැස්සුවා
+      final user = await remoteDataSource.login(email, password);
       return Right(user);
     } on AuthException catch (e) {
       return Left(AuthFailure(message: e.message));
@@ -34,10 +34,11 @@ class AuthRepositoryImpl implements AuthRepository {
     String phoneNo,
   ) async {
     try {
+      // Named arguments වෙනුවට positional arguments ලෙස වෙනස් කළා
       final user = await remoteDataSource.register(
-        email: email,
-        password: password,
-        phoneNo: phoneNo,
+        email,
+        password,
+        phoneNo,
       );
       return Right(user);
     } on AuthException catch (e) {
