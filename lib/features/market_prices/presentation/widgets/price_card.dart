@@ -1,9 +1,9 @@
-// lib/features/market_prices/presentation/widgets/price_card.dart
 import 'package:flutter/material.dart';
-import '../../domain/entities/price.dart';
+import '../../domain/entities/price.dart'; // මෙහි PriceEntity අඩංගු විය යුතුයි
 
 class PriceCard extends StatelessWidget {
-  final Price price;
+  // 'Price' වෙනුවට 'PriceEntity' ලෙස වෙනස් කළා
+  final PriceEntity price; 
   final VoidCallback? onTap;
 
   const PriceCard({
@@ -52,8 +52,8 @@ class PriceCard extends StatelessWidget {
               Container(
                 width: 46,
                 height: 46,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6E3),
+                decoration: const BoxDecoration( // const එක් කළා
+                  color: Color(0xFFEFF6E3),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -124,4 +124,3 @@ class PriceCard extends StatelessWidget {
     );
   }
 }
-//
