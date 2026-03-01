@@ -9,7 +9,7 @@ class LoginUseCase {
   const LoginUseCase(this.repository);
 
   Future<Either<Failure, UserEntity>> call(LoginParams params) =>
-      repository.login(email: params.email, password: params.password);
+      repository.login(params.email, params.password);
 }
 
 class LoginParams extends Equatable {
