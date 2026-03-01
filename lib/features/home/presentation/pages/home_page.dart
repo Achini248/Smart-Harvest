@@ -136,7 +136,7 @@ class HomeTabView extends StatelessWidget {
                   'My Crops',
                   Icons.agriculture,
                   () {
-                    Navigator.pushNamed(context, RouteNames.cropsList);
+                    Navigator.pushNamed(context, RouteNames.myCrops);
                   },
                 ),
                 _buildQuickActionCard(
