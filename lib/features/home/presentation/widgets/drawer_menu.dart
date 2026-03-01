@@ -9,7 +9,7 @@ import '../../../authentication/presentation/bloc/auth_event.dart';
 import '../../../authentication/presentation/bloc/auth_state.dart';
 
 class DrawerMenu extends StatelessWidget {
-  const DrawerMenu({super.key});
+  const DrawerMenu({super.key}); // මෙතන const එකතු කළා
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class DrawerMenu extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildHeader(context),
-            const Divider(),
+            const Divider(), // const එක් කළා
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
@@ -41,8 +41,7 @@ class DrawerMenu extends StatelessWidget {
                     title: 'My Crops',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteNames.myCrops);
+                      Navigator.pushNamed(context, RouteNames.myCrops);
                     },
                   ),
                   _DrawerItem(
@@ -50,8 +49,7 @@ class DrawerMenu extends StatelessWidget {
                     title: 'Market Prices',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteNames.dailyMarketPrices);
+                      Navigator.pushNamed(context, RouteNames.dailyMarketPrices);
                     },
                   ),
                   _DrawerItem(
@@ -59,8 +57,7 @@ class DrawerMenu extends StatelessWidget {
                     title: 'Weather',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteNames.weatherOverview);
+                      Navigator.pushNamed(context, RouteNames.weatherOverview);
                     },
                   ),
                   _DrawerItem(
@@ -68,8 +65,7 @@ class DrawerMenu extends StatelessWidget {
                     title: 'Notifications',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteNames.notifications);
+                      Navigator.pushNamed(context, RouteNames.notifications);
                     },
                   ),
                   _DrawerItem(
@@ -77,8 +73,7 @@ class DrawerMenu extends StatelessWidget {
                     title: 'Messages',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteNames.messagesList);
+                      Navigator.pushNamed(context, RouteNames.messagesList);
                     },
                   ),
                   const SizedBox(height: 8),
@@ -88,8 +83,8 @@ class DrawerMenu extends StatelessWidget {
                     title: 'Account Settings',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteNames.accountSettings);
+                      
+                      Navigator.pushNamed(context, RouteNames.profileSettings);
                     },
                   ),
                   _DrawerItem(
@@ -97,8 +92,7 @@ class DrawerMenu extends StatelessWidget {
                     title: 'Help & Support',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteNames.helpSupport);
+                      
                     },
                   ),
                 ],
@@ -124,8 +118,7 @@ class DrawerMenu extends StatelessWidget {
         }
 
         return UserAccountsDrawerHeader(
-          decoration:
-              const BoxDecoration(color: AppColors.primaryGreen),
+          decoration: const BoxDecoration(color: AppColors.primaryGreen),
           accountName: Text(
             name,
             style: AppTextStyles.bodyTextBold.copyWith(
@@ -181,14 +174,12 @@ class _DrawerItem extends StatelessWidget {
 
 class _SectionLabel extends StatelessWidget {
   final String label;
-
   const _SectionLabel({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Text(
         label.toUpperCase(),
         style: AppTextStyles.caption.copyWith(
@@ -204,8 +195,7 @@ class _LogoutTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading:
-          const Icon(Icons.logout, color: AppColors.error),
+      leading: const Icon(Icons.logout, color: AppColors.error),
       title: Text(
         'Logout',
         style: AppTextStyles.bodyTextBold.copyWith(
@@ -214,7 +204,9 @@ class _LogoutTile extends StatelessWidget {
       ),
       onTap: () {
         Navigator.pop(context);
-        context.read<AuthBloc>().add(const LogoutEvent());
+        
+        context.read<AuthBloc>().add(LogoutEvent());
+        
         Navigator.pushNamedAndRemoveUntil(
           context,
           RouteNames.login,
