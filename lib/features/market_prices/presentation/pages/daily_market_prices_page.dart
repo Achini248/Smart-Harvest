@@ -1,4 +1,3 @@
-// lib/features/market_prices/presentation/pages/daily_market_prices_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,159 +10,148 @@ import '../bloc/price_event.dart';
 import '../bloc/price_state.dart';
 import '../widgets/price_card.dart';
 
-class DailyMarketPricesPage extends StatelessWidget {
+class DailyMarketPricesPage extends StatefulWidget {
   const DailyMarketPricesPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => PriceBloc(
-        getDailyPrices:
-            GetDailyPricesUseCase(PriceRepositoryImpl(
-          remoteDataSource: PriceRemoteDataSourceImpl(),
-        )),
-        getPriceTrends:
-            GetPriceTrendsUseCase(PriceRepositoryImpl(
-          remoteDataSource: PriceRemoteDataSourceImpl(),
-        )),
-      )..add(const LoadDailyPricesEvent()),
-      child: const _DailyMarketPricesView(),
-    );
-  }
+  State<DailyMarketPricesPage> createState() =>
+      _DailyMarketPricesPageState();
 }
 
-class _DailyMarketPricesView extends StatefulWidget {
-  const _DailyMarketPricesView();
+class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
+  late final PriceBloc _bloc;
+  final TextEditingController _searchCtrl = TextEditingController();
 
   @override
-  State<_DailyMarketPricesView> createState() =>
-      _DailyMarketPricesViewState();
-}
-
-class _DailyMarketPricesViewState
-    extends State<_DailyMarketPricesView> {
-  final TextEditingController _searchCtrl = TextEditingController();
-  String _searchQuery = '';
+  void initState() {
+    super.initState();
+    final repo = PriceRepositoryImpl(
+      remoteDataSource: PriceRemoteDataSourceImpl(),
+    );
+    _bloc = PriceBloc(
+      getDailyPrices: GetDailyPricesUseCase(repo),
+      getPriceTrends: GetPriceTrendsUseCase(repo),
+    )..add(const LoadDailyPricesEvent());
+  }
 
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _bloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F7),
-      appBar: AppBar(
+    return BlocProvider<PriceBloc>.value(
+      value: _bloc,
+      child: Scaffold(
         backgroundColor: const Color(0xFFF4F5F7),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              size: 18, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: const Text(
-          'Daily Market Prices',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: Colors.black87,
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFF4F5F7),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 18,
+              color: Colors.black87,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+          centerTitle: true,
+          title: const Text(
+            'Daily Market Prices',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: Colors.black87,
+            ),
           ),
         ),
-      ),
-      body: Column(
-        children: [
-          // Search
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              onChanged: (value) {
-                setState(() => _searchQuery = value.trim());
-              },
-              decoration: InputDecoration(
-                hintText: 'Search crop',
-                hintStyle: TextStyle(color: Colors.grey.shade400),
-                prefixIcon: Icon(Icons.search,
-                    color: Colors.grey.shade400),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
+        body: Column(
+          children: [
+            // Search
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: TextField(
+                controller: _searchCtrl,
+                onChanged: (value) => _bloc.add(
+                  SearchPricesEvent(query: value),
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Search crop',
+                  hintStyle:
+                      TextStyle(color: Colors.grey.shade400),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.grey.shade400,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ),
-          ),
+            Expanded(
+              child: BlocBuilder<PriceBloc, PriceState>(
+                builder: (context, state) {
+                  if (state.isLoading &&
+                      state.filteredPrices.isEmpty) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF7BA53D),
+                      ),
+                    );
+                  }
 
-          Expanded(
-            child: BlocBuilder<PriceBloc, PriceState>(
-              builder: (context, state) {
-                if (state.isLoading && state.prices.isEmpty) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF7BA53D),
+                  if (state.errorMessage != null &&
+                      state.filteredPrices.isEmpty) {
+                    return _ErrorView(
+                      message: state.errorMessage!,
+                      onRetry: () => _bloc.add(
+                        const LoadDailyPricesEvent(),
+                      ),
+                    );
+                  }
+
+                  if (state.filteredPrices.isEmpty) {
+                    return const _EmptyView();
+                  }
+
+                  return RefreshIndicator(
+                    color: const Color(0xFF7BA53D),
+                    onRefresh: () async {
+                      _bloc.add(const LoadDailyPricesEvent());
+                      await Future.delayed(
+                          const Duration(milliseconds: 400));
+                    },
+                    child: ListView.builder(
+                      itemCount: state.filteredPrices.length,
+                      itemBuilder: (context, index) {
+                        final price = state.filteredPrices[index];
+                        return PriceCard(
+                          price: price,
+                          onTap: () {
+                            _bloc.add(
+                              LoadPriceTrendsEvent(
+                                  productName: price.productName),
+                            );
+                            // Optionally show a bottom sheet with trend info
+                          },
+                        );
+                      },
                     ),
                   );
-                }
-
-                if (state.errorMessage != null &&
-                    state.prices.isEmpty) {
-                  return _ErrorView(
-                    message: state.errorMessage!,
-                    onRetry: () => context
-                        .read<PriceBloc>()
-                        .add(const LoadDailyPricesEvent()),
-                  );
-                }
-
-                final filtered = _searchQuery.isEmpty
-                    ? state.prices
-                    : state.prices
-                        .where((p) => p.productName
-                            .toLowerCase()
-                            .contains(_searchQuery.toLowerCase()))
-                        .toList();
-
-                if (filtered.isEmpty) {
-                  return const _EmptyView();
-                }
-
-                return RefreshIndicator(
-                  color: const Color(0xFF7BA53D),
-                  onRefresh: () async {
-                    context
-                        .read<PriceBloc>()
-                        .add(const LoadDailyPricesEvent());
-                    await Future.delayed(
-                        const Duration(milliseconds: 400));
-                  },
-                  child: ListView.builder(
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final price = filtered[index];
-                      return PriceCard(
-                        price: price,
-                        onTap: () {
-                          // Load trends for this product (optional)
-                          context.read<PriceBloc>().add(
-                                LoadPriceTrendsEvent(
-                                    price.productName),
-                              );
-                          // You could show bottom sheet with trends chart.
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -186,14 +174,18 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline,
-                size: 48, color: Colors.redAccent),
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.redAccent,
+            ),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.grey,
+                fontSize: 14,
               ),
             ),
             const SizedBox(height: 16),
@@ -205,8 +197,11 @@ class _ErrorView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              icon: const Icon(Icons.refresh,
-                  color: Colors.white, size: 18),
+              icon: const Icon(
+                Icons.refresh,
+                color: Colors.white,
+                size: 18,
+              ),
               label: const Text(
                 'Retry',
                 style: TextStyle(color: Colors.white),
