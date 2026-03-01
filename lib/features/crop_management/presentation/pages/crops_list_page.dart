@@ -178,7 +178,7 @@ class _CropsListPageState extends State<CropsListPage> {
                       crop: crop,
                       onTap: () => Navigator.pushNamed(
                         context,
-                        RouteNames.cropDetail,
+                        RouteNames.cropDetails,
                         arguments: crop,
                       ),
                       onEdit: () => Navigator.pushNamed(
