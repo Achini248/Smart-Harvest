@@ -26,7 +26,7 @@ class _SmartHarvestAppState extends State<SmartHarvestApp> {
       providers: [
         BlocProvider<AuthBloc>(
           create: (_) =>
-              di.sl<AuthBloc>()..add(const CheckAuthStatusEvent()),
+              di.sl<AuthBloc>()..add( CheckAuthStatusEvent()),
         ),
       ],
       child: BlocListener<AuthBloc, AuthState>(
