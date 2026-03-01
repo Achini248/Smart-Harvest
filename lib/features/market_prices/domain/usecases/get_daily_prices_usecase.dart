@@ -7,7 +7,7 @@ class GetDailyPricesUseCase {
 
   GetDailyPricesUseCase(this.repository);
 
-  Future<List<Price>> call() {
+ Future<List<PriceEntity>> call() {
     return repository.getDailyPrices();
   }
 }
