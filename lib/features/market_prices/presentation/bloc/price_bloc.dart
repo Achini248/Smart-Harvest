@@ -26,11 +26,13 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
     
     final result = await getDailyPrices();
     
+    // වැදගත්: මෙහි 'return' keyword එක පාවිච්චි නොකරන්න. 
+    // එය "Null Function" error එකට හේතු වේ.
     result.fold(
       (failure) {
         emit(state.copyWith(
           isLoading: false, 
-          errorMessage: 'මිල ගණන් ලබා ගැනීමට අපොහොසත් විය.'
+          errorMessage: 'Failed to load prices'
         ));
       },
       (pricesList) {
@@ -38,6 +40,7 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
           isLoading: false,
           allPrices: pricesList,
           filteredPrices: pricesList,
+          errorMessage: pricesList.isEmpty ? 'No prices available today.' : null,
         ));
       },
     );
@@ -51,7 +54,9 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
     
     result.fold(
       (failure) {
-        emit(state.copyWith(errorMessage: 'දත්ත ලබා ගැනීමට නොහැක.'));
+        emit(state.copyWith(
+          errorMessage: 'Could not load trends for ${event.productName}'
+        ));
       },
       (trendsMap) {
         emit(state.copyWith(
@@ -62,15 +67,21 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
     );
   }
 
-  void _onSearch(SearchPricesEvent event, Emitter<PriceState> emit) {
+  void _onSearch(
+    SearchPricesEvent event,
+    Emitter<PriceState> emit,
+  ) {
     final query = event.query.trim().toLowerCase();
+    
     if (query.isEmpty) {
       emit(state.copyWith(filteredPrices: state.allPrices));
       return;
     }
+
     final filtered = state.allPrices
-        .where((p) => p.productName.toLowerCase().contains(query))
+        .where((PriceEntity p) => p.productName.toLowerCase().contains(query))
         .toList();
+        
     emit(state.copyWith(filteredPrices: filtered));
   }
 }
