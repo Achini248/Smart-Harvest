@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'route_names.dart';
 
 // Authentication feature
@@ -14,11 +13,9 @@ import '../../features/home/presentation/pages/onboarding_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 
 // Crop management feature
-
 import '../../features/crop_management/presentation/pages/add_crop_page.dart';
-
 import '../../features/crop_management/presentation/pages/crops_list_page.dart';
-import '../../features/crop_management/presentation/pages/crop_detail_page.dart';
+import '../../features/crop_management/presentation/pages/crop_details_page.dart'; // මෙතන නම 'details' විය යුතුයි
 
 // Marketplace feature
 import '../../features/marketplace/presentation/pages/marketplace_home_page.dart';
@@ -67,7 +64,8 @@ class AppRouter {
 
       // Crop management
       case RouteNames.myCrops:
-        return _slide(const MyCropsPage(), settings);
+        // const අයින් කළා මොකද MyCropsPage එකේ const ගැටළු එන නිසා
+        return _slide(MyCropsPage(), settings); 
       case RouteNames.addCrop:
         return _slide(const AddCropPage(), settings);
       case RouteNames.cropDetails:
@@ -104,8 +102,8 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>?;
         return _slide(
           ChatPage(
-            conversationId: args?['conversationId'] as String?,
-            peerName: args?['peerName'] as String?,
+            // ChatPage එකේ ඉල්ලන්නේ 'conversation' object එකයි
+            conversation: args?['conversation'], 
           ),
           settings,
         );
@@ -121,15 +119,13 @@ class AppRouter {
     }
   }
 
+  // Transitions (Fade & Slide)
   Route<dynamic> _fade(Widget page, RouteSettings settings) {
     return PageRouteBuilder(
       settings: settings,
       pageBuilder: (_, __, ___) => page,
       transitionsBuilder: (_, animation, __, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
+        return FadeTransition(opacity: animation, child: child);
       },
     );
   }
@@ -142,16 +138,8 @@ class AppRouter {
         final offsetAnimation = Tween<Offset>(
           begin: const Offset(0.0, 0.05),
           end: Offset.zero,
-        ).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          ),
-        );
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+        return SlideTransition(position: offsetAnimation, child: child);
       },
     );
   }
@@ -160,15 +148,8 @@ class AppRouter {
     return MaterialPageRoute(
       settings: settings,
       builder: (_) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Page not found'),
-        ),
-        body: Center(
-          child: Text(
-            'No route defined for "${settings.name}"',
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
+        appBar: AppBar(title: const Text('Page not found')),
+        body: Center(child: Text('No route defined for "${settings.name}"')),
       ),
     );
   }
