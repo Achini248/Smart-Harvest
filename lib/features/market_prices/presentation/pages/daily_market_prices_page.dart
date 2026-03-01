@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// Import නිවැරදිව ඇති බව සහතික කරගන්න
 import '../../data/datasources/price_remote_datasource.dart';
 import '../../data/repositories/price_repository_impl.dart';
 import '../../domain/usecases/get_daily_prices_usecase.dart';
@@ -14,8 +15,7 @@ class DailyMarketPricesPage extends StatefulWidget {
   const DailyMarketPricesPage({super.key});
 
   @override
-  State<DailyMarketPricesPage> createState() =>
-      _DailyMarketPricesPageState();
+  State<DailyMarketPricesPage> createState() => _DailyMarketPricesPageState();
 }
 
 class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
@@ -25,13 +25,15 @@ class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
   @override
   void initState() {
     super.initState();
+    // Repository සහ UseCases initialize කිරීම
     final repo = PriceRepositoryImpl(
       remoteDataSource: PriceRemoteDataSourceImpl(),
     );
+    
     _bloc = PriceBloc(
       getDailyPrices: GetDailyPricesUseCase(repo),
       getPriceTrends: GetPriceTrendsUseCase(repo),
-    )..add(const LoadDailyPricesEvent());
+    )..add(const LoadDailyPricesEvent()); // මෙහි 'const' වැඩ කරන්නේ PriceEvent එකේ constructor එක 'const' නම් පමණි
   }
 
   @override
@@ -70,7 +72,7 @@ class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
         ),
         body: Column(
           children: [
-            // Search
+            // Search Bar
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: TextField(
@@ -80,16 +82,14 @@ class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
                 ),
                 decoration: InputDecoration(
                   hintText: 'Search crop',
-                  hintStyle:
-                      TextStyle(color: Colors.grey.shade400),
+                  hintStyle: TextStyle(color: Colors.grey.shade400),
                   prefixIcon: Icon(
                     Icons.search,
                     color: Colors.grey.shade400,
                   ),
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -100,8 +100,7 @@ class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
             Expanded(
               child: BlocBuilder<PriceBloc, PriceState>(
                 builder: (context, state) {
-                  if (state.isLoading &&
-                      state.filteredPrices.isEmpty) {
+                  if (state.isLoading && state.filteredPrices.isEmpty) {
                     return const Center(
                       child: CircularProgressIndicator(
                         color: Color(0xFF7BA53D),
@@ -109,13 +108,10 @@ class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
                     );
                   }
 
-                  if (state.errorMessage != null &&
-                      state.filteredPrices.isEmpty) {
+                  if (state.errorMessage != null && state.filteredPrices.isEmpty) {
                     return _ErrorView(
                       message: state.errorMessage!,
-                      onRetry: () => _bloc.add(
-                        const LoadDailyPricesEvent(),
-                      ),
+                      onRetry: () => _bloc.add(const LoadDailyPricesEvent()),
                     );
                   }
 
@@ -127,21 +123,20 @@ class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
                     color: const Color(0xFF7BA53D),
                     onRefresh: () async {
                       _bloc.add(const LoadDailyPricesEvent());
-                      await Future.delayed(
-                          const Duration(milliseconds: 400));
+                      await Future.delayed(const Duration(milliseconds: 400));
                     },
                     child: ListView.builder(
                       itemCount: state.filteredPrices.length,
+                      padding: const EdgeInsets.only(bottom: 16),
                       itemBuilder: (context, index) {
                         final price = state.filteredPrices[index];
                         return PriceCard(
                           price: price,
                           onTap: () {
                             _bloc.add(
-                              LoadPriceTrendsEvent(
-                                  productName: price.productName),
+                              LoadPriceTrendsEvent(price.productName),
                             );
-                            // Optionally show a bottom sheet with trend info
+                            // අවශ්‍ය නම් මෙතනදී BottomSheet එකක් පෙන්විය හැක
                           },
                         );
                       },
@@ -157,97 +152,48 @@ class _DailyMarketPricesPageState extends State<DailyMarketPricesPage> {
   }
 }
 
+// Error View Widget
 class _ErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
 
-  const _ErrorView({
-    required this.message,
-    required this.onRetry,
-  });
+  const _ErrorView({required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.redAccent,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7BA53D),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              icon: const Icon(
-                Icons.refresh,
-                color: Colors.white,
-                size: 18,
-              ),
-              label: const Text(
-                'Retry',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+          const SizedBox(height: 12),
+          Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: onRetry,
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7BA53D)),
+            child: const Text('Retry', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
 }
 
+// Empty View Widget
 class _EmptyView extends StatelessWidget {
   const _EmptyView();
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                color: const Color(0xFF7BA53D).withOpacity(0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.storefront_outlined,
-                size: 40,
-                color: Color(0xFF7BA53D),
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'No market prices available.',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.storefront_outlined, size: 48, color: Color(0xFF7BA53D)),
+          SizedBox(height: 12),
+          Text('No market prices available.', style: TextStyle(color: Colors.grey)),
+        ],
       ),
     );
   }
