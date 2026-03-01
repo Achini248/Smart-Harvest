@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../config/routes/route_names.dart';
 import '../../domain/entities/user.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../../config/routes/route_names.dart';
 
 class ProfileSettingsPage extends StatelessWidget {
   const ProfileSettingsPage({super.key});
@@ -14,104 +14,28 @@ class ProfileSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
+      appBar: AppBar(
+        title: const Text('Account'),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             UserEntity? user;
-            if (state is Authenticated) user = state.user;
+            if (state is Authenticated) {
+              user = state.user;
+            }
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top bar
+                const SizedBox(height: 16),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 16),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            size: 18),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Account',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const Spacer(),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Card
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 34,
-                          backgroundColor: const Color(0xFF7BA53D)
-                              .withOpacity(0.12),
-                          child: Text(
-                            user?.displayName.isNotEmpty == true
-                                ? user!.displayName[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF7BA53D),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user?.displayName ??
-                                    'Smart Harvest User',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                user?.email ?? '',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _ProfileHeader(user: user),
                 ),
                 const SizedBox(height: 24),
-                _SectionTitle(title: 'Account'),
+                const _SectionTitle(title: 'Account'),
                 _MenuItem(
                   icon: Icons.person_outline,
                   title: 'My Profile',
@@ -137,14 +61,6 @@ class ProfileSettingsPage extends StatelessWidget {
                   title: 'Customer Support',
                   onTap: () {},
                 ),
-                _MenuItem(
-                  icon: Icons.dashboard_outlined,
-                  title: 'Dashboard',
-                  onTap: () {
-                    Navigator.pushReplacementNamed(
-                        context, RouteNames.home);
-                  },
-                ),
                 const Spacer(),
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -156,7 +72,7 @@ class ProfileSettingsPage extends StatelessWidget {
                       onPressed: () {
                         context
                             .read<AuthBloc>()
-                            .add(const LogoutRequested());
+                            .add(const LogoutEvent());
                         Navigator.pushNamedAndRemoveUntil(
                           context,
                           RouteNames.login,
@@ -169,8 +85,10 @@ class ProfileSettingsPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      icon: const Icon(Icons.logout,
-                          color: Colors.white),
+                      icon: const Icon(
+                        Icons.logout,
+                        color: Colors.white,
+                      ),
                       label: const Text(
                         'Logout',
                         style: TextStyle(
@@ -180,11 +98,77 @@ class ProfileSettingsPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileHeader extends StatelessWidget {
+  final UserEntity? user;
+
+  const _ProfileHeader({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final name = user?.displayName ?? 'Smart Harvest User';
+    final email = user?.email ?? '';
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 34,
+            backgroundColor: const Color(0xFF7BA53D).withOpacity(0.12),
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF7BA53D),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -232,8 +216,8 @@ class _MenuItem extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      onTap: onTap,
       trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: onTap,
     );
   }
 }
