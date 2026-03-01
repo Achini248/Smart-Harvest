@@ -63,7 +63,7 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
                     child: ListTile(
                       title: Text(product.name),
                       // මෙතන 'price' වෙනුවට 'unitPrice' ලෙස නිවැරදි කළා
-                      subtitle: Text('Rs. ${product.unitPrice}'), 
+                     subtitle: Text('Rs. ${product.pricePerUnit} per ${product.unit}'), 
                       trailing: ElevatedButton(
                         onPressed: () {
                           // Order logic goes here
