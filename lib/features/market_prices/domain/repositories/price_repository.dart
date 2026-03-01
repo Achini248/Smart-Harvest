@@ -2,8 +2,8 @@
 import '../entities/price.dart';
 
 abstract class PriceRepository {
-  Future<List<Price>> getDailyPrices();
-
+  
+Future<List<PriceEntity>> getDailyPrices(); 
   /// Returns map of date -> price for a given product.
   Future<Map<DateTime, double>> getPriceTrends(String productName);
 }
