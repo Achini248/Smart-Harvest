@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/price.dart'; 
 import '../../domain/usecases/get_daily_prices_usecase.dart';
 import '../../domain/usecases/get_price_trends_usecase.dart';
 import 'price_event.dart';
@@ -24,6 +25,7 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
   ) async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
+      
       final prices = await getDailyPrices();
       emit(state.copyWith(
         isLoading: false,
@@ -45,6 +47,7 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
   ) async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
+      
       final trends = await getPriceTrends(event.productName);
       emit(state.copyWith(
         isLoading: false,
@@ -64,13 +67,17 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
     Emitter<PriceState> emit,
   ) async {
     final query = event.query.trim().toLowerCase();
+    
     if (query.isEmpty) {
       emit(state.copyWith(filteredPrices: state.allPrices));
       return;
     }
+
+    
     final filtered = state.allPrices
-        .where((p) => p.productName.toLowerCase().contains(query))
+        .where((PriceEntity p) => p.productName.toLowerCase().contains(query))
         .toList();
+        
     emit(state.copyWith(filteredPrices: filtered));
   }
 }
