@@ -1,179 +1,153 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../config/routes/route_names.dart';
+import '../../domain/entities/product.dart';
 import '../bloc/marketplace_bloc.dart';
 import '../bloc/marketplace_event.dart';
 import '../bloc/marketplace_state.dart';
 import '../widgets/product_card.dart';
-import '../../domain/entities/product_entity.dart';
 
 class MarketplaceHomePage extends StatefulWidget {
   const MarketplaceHomePage({super.key});
 
   @override
-  State<MarketplaceHomePage> createState() => _MarketplaceHomePageState();
+  State<MarketplaceHomePage> createState() =>
+      _MarketplaceHomePageState();
 }
 
 class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
-  final _searchCtrl = TextEditingController();
-  String? _selectedCategory;
-
-  final List<String?> _categories = [
-    null,
-    'vegetables',
-    'fruits',
-    'grains',
-    'legumes',
-    'herbs',
-    'dairy',
-    'other',
-  ];
-
-  final Map<String?, String> _categoryLabels = {
-    null: 'All',
-    'vegetables': 'Vegetables',
-    'fruits': 'Fruits',
-    'grains': 'Grains',
-    'legumes': 'Legumes',
-    'herbs': 'Herbs',
-    'dairy': 'Dairy',
-    'other': 'Other',
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<MarketplaceBloc>().add(const LoadProductsEvent());
-  }
+  final _orderFormKey = GlobalKey<FormState>();
+  final TextEditingController _quantityCtrl = TextEditingController();
+  final TextEditingController _notesCtrl = TextEditingController();
 
   @override
   void dispose() {
-    _searchCtrl.dispose();
+    _quantityCtrl.dispose();
+    _notesCtrl.dispose();
     super.dispose();
   }
 
   void _showOrderDialog(BuildContext context, ProductEntity product) {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return;
-
-    final qtyCtrl = TextEditingController(text: '1');
-    final notesCtrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
+    _quantityCtrl.clear();
+    _notesCtrl.clear();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => Padding(
         padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 20,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 16,
         ),
         child: Form(
-          key: formKey,
+          key: _orderFormKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+              Container(
+                height: 4,
+                width: 40,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Text(
+                'Order ${product.name}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Order — ${product.name}',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 4),
-              Text(
-                'Rs. ${product.pricePerUnit.toStringAsFixed(2)} per ${product.unit}  •  ${product.sellerName}',
-                style: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 13),
-              ),
-              const SizedBox(height: 20),
               TextFormField(
-                controller: qtyCtrl,
-                keyboardType: TextInputType.number,
-                decoration:
-                    _dec(label: 'Quantity (${product.unit})', icon: Icons.straighten),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Required';
-                  final q = double.tryParse(v);
-                  if (q == null || q <= 0) return 'Enter valid quantity';
-                  if (q > product.availableQuantity) {
-                    return 'Only ${product.availableQuantity} ${product.unit} available';
+                controller: _quantityCtrl,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: _dec(
+                  label: 'Quantity (${product.unit})',
+                  icon: Icons.production_quantity_limits,
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Quantity is required';
+                  }
+                  final parsed = double.tryParse(value);
+                  if (parsed == null || parsed <= 0) {
+                    return 'Enter a valid quantity';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 12),
               TextFormField(
-                controller: notesCtrl,
-                maxLines: 2,
-                decoration: _dec(label: 'Notes (optional)', icon: Icons.notes),
+                controller: _notesCtrl,
+                maxLines: 3,
+                decoration: _dec(
+                  label: 'Notes (optional)',
+                  icon: Icons.notes,
+                ),
               ),
               const SizedBox(height: 20),
-              BlocConsumer<MarketplaceBloc, MarketplaceState>(
-                listener: (ctx, state) {
-                  if (state is OrderPlacedState) {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Order placed successfully!'),
-                        backgroundColor: AppColors.primaryGreen,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  } else if (state is MarketplaceErrorState) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: AppColors.error,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
-                builder: (ctx, state) {
-                  final loading = state is MarketplaceOperationLoadingState;
-                  return SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: loading
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (!_orderFormKey.currentState!.validate()) return;
+
+                    final quantity =
+                        double.parse(_quantityCtrl.text.trim());
+
+                    final order = OrderEntity(
+                      id: '',
+                      productId: product.id,
+                      productName: product.name,
+                      buyerId: 'CURRENT_USER_ID', // plug auth user
+                      buyerName: 'Current User',
+                      sellerId: product.sellerId,
+                      sellerName: product.sellerName,
+                      quantity: quantity,
+                      unit: product.unit,
+                      pricePerUnit: product.pricePerUnit,
+                      totalPrice: product.pricePerUnit * quantity,
+                      status: 'pending',
+                      notes: _notesCtrl.text.trim().isEmpty
                           ? null
-                          : () {
-                              if (formKey.currentState!.validate()) {
-                                context.read<MarketplaceBloc>().add(
-                                      PlaceOrderEvent(
-                                        productId: product.id,
-                                        quantity:
-                                            double.parse(qtyCtrl.text.trim()),
-                                        notes: notesCtrl.text.trim(),
-                                      ),
-                                    );
-                              }
-                            },
-                      child: loading
-                          ? const CircularProgressIndicator()
-                          : const Text('Place Order'),
+                          : _notesCtrl.text.trim(),
+                      location: 'N/A',
+                      createdAt: DateTime.now(),
+                      updatedAt: DateTime.now(),
+                    );
+
+                    context.read<MarketplaceBloc>().add(
+                          PlaceOrderEvent(order: order),
+                        );
+
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7BA53D),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
                     ),
-                  );
-                },
+                  ),
+                  child: const Text(
+                    'Place Order',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -181,28 +155,72 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
     );
   }
 
-  InputDecoration _dec({required String label, required IconData icon}) {
+  InputDecoration _dec({
+    required String label,
+    required IconData icon,
+  }) {
     return InputDecoration(
       labelText: label,
       prefixIcon: Icon(icon),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
         title: const Text('Marketplace'),
+        centerTitle: true,
       ),
-      body: BlocBuilder<MarketplaceBloc, MarketplaceState>(
-        builder: (context, state) {
-          if (state is MarketplaceLoadingState) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is MarketplaceLoadedState) {
+      body: BlocConsumer<MarketplaceBloc, MarketplaceState>(
+        listener: (ctx, state) {
+          if (state is MarketplaceOperationSuccess) {
+            ScaffoldMessenger.of(ctx).showSnackBar(
+              const SnackBar(
+                content: Text('Order placed successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else if (state is MarketplaceErrorState) {
+            ScaffoldMessenger.of(ctx).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+        },
+        builder: (ctx, state) {
+          final isLoading =
+              state is MarketplaceLoadingState ||
+              state is MarketplaceOperationLoadingState;
+
+          if (isLoading && state is! MarketplaceLoaded) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF7BA53D),
+              ),
+            );
+          }
+
+          if (state is MarketplaceLoaded) {
             final products = state.products;
+            if (products.isEmpty) {
+              return const Center(
+                child: Text(
+                  'No products available.',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              );
+            }
+
             return ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 12),
               itemCount: products.length,
               itemBuilder: (context, index) {
                 final product = products[index];
@@ -212,10 +230,18 @@ class _MarketplaceHomePageState extends State<MarketplaceHomePage> {
                 );
               },
             );
-          } else if (state is MarketplaceErrorState) {
-            return Center(child: Text(state.message));
           }
-          return const SizedBox();
+
+          if (state is MarketplaceErrorState) {
+            return Center(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            );
+          }
+
+          return const SizedBox.shrink();
         },
       ),
     );
