@@ -9,7 +9,7 @@ class RegisterUseCase {
   const RegisterUseCase(this.repository);
 
   Future<Either<Failure, UserEntity>> call(RegisterParams params) =>
-      repository.register(params.email, params.password, params.phoneNo);
+      repository.register(params.email, params.password, params.phoneNumber);
 }
 
 class RegisterParams extends Equatable {
