@@ -15,7 +15,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 // Crop management feature
 import '../../features/crop_management/presentation/pages/add_crop_page.dart';
 import '../../features/crop_management/presentation/pages/crops_list_page.dart';
-import '../../features/crop_management/presentation/pages/crop_detail_page.dart'; // මෙතන නම 'details' විය යුතුයි
+import '../../features/crop_management/presentation/pages/crop_detail_page.dart'; 
 
 // Marketplace feature
 import '../../features/marketplace/presentation/pages/marketplace_home_page.dart';
@@ -64,14 +64,15 @@ class AppRouter {
 
       // Crop management
       case RouteNames.myCrops:
-        // const අයින් කළා මොකද MyCropsPage එකේ const ගැටළු එන නිසා
-        return _slide(MyCropsPage(), settings); 
+        // 'MyCropsPage' වෙනුවට නිවැරදි Class Name එක 'CropsListPage' ලෙස වෙනස් කළා
+        return _slide(const CropsListPage(), settings); 
       case RouteNames.addCrop:
         return _slide(const AddCropPage(), settings);
       case RouteNames.cropDetails:
         final args = settings.arguments as Map<String, dynamic>?;
         return _slide(
-          CropDetailsPage(
+          // 'CropDetailsPage' වෙනුවට නිවැරදි Class Name එක 'CropDetailPage' ලෙස වෙනස් කළා
+          CropDetailPage(
             cropId: args?['cropId'] as String?,
           ),
           settings,
@@ -102,7 +103,6 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>?;
         return _slide(
           ChatPage(
-            // ChatPage එකේ ඉල්ලන්නේ 'conversation' object එකයි
             conversation: args?['conversation'], 
           ),
           settings,
