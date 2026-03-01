@@ -51,7 +51,7 @@ class DrawerMenu extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(
-                          context, RouteNames.dailymarketPrices);
+                          context, RouteNames.dailyMarketPrices);
                     },
                   ),
                   _DrawerItem(
