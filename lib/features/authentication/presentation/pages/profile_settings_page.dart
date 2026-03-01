@@ -35,7 +35,7 @@ class ProfileSettingsPage extends StatelessWidget {
                   child: _ProfileHeader(user: user),
                 ),
                 const SizedBox(height: 24),
-                const _SectionTitle(title: 'Account'),
+                const _SectionTitle(title: 'Account Settings'),
                 _MenuItem(
                   icon: Icons.person_outline,
                   title: 'My Profile',
@@ -43,18 +43,17 @@ class ProfileSettingsPage extends StatelessWidget {
                 ),
                 _MenuItem(
                   icon: Icons.agriculture_outlined,
-                  title: 'My Crop',
-                  onTap: () {},
-                ),
-                _MenuItem(
-                  icon: Icons.settings_outlined,
-                  title: 'Settings',
-                  onTap: () {},
+                  title: 'My Crops',
+                  onTap: () {
+                    Navigator.pushNamed(context, RouteNames.myCrops);
+                  },
                 ),
                 _MenuItem(
                   icon: Icons.shopping_cart_outlined,
-                  title: 'My Cart',
-                  onTap: () {},
+                  title: 'My Orders',
+                  onTap: () {
+                    Navigator.pushNamed(context, RouteNames.myOrders);
+                  },
                 ),
                 _MenuItem(
                   icon: Icons.support_agent_outlined,
@@ -70,9 +69,9 @@ class ProfileSettingsPage extends StatelessWidget {
                     height: 52,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        context
-                            .read<AuthBloc>()
-                            .add(const LogoutEvent());
+                        // මෙතන තිබුණු 'const' ඉවත් කළා
+                        context.read<AuthBloc>().add(LogoutEvent());
+                        
                         Navigator.pushNamedAndRemoveUntil(
                           context,
                           RouteNames.login,
@@ -81,19 +80,18 @@ class ProfileSettingsPage extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white, // Text සහ Icon වල පාට
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      icon: const Icon(
-                        Icons.logout,
-                        color: Colors.white,
-                      ),
+                      icon: const Icon(Icons.logout),
                       label: const Text(
                         'Logout',
                         style: TextStyle(
-                          color: Colors.white,
                           fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
                       ),
                     ),
@@ -110,12 +108,12 @@ class ProfileSettingsPage extends StatelessWidget {
 
 class _ProfileHeader extends StatelessWidget {
   final UserEntity? user;
-
   const _ProfileHeader({required this.user});
 
   @override
   Widget build(BuildContext context) {
-    final name = user?.displayName ?? 'Smart Harvest User';
+    // UserEntity එකේ property names ඔබේ entity එකට ගැලපෙන ලෙස මෙහි දමා ඇත
+    final name = user?.name ?? 'Smart Harvest User';
     final email = user?.email ?? '';
 
     return Container(
@@ -181,14 +179,14 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsets.only(left: 24, right: 24, top: 8, bottom: 8),
+      padding: const EdgeInsets.only(left: 24, right: 24, top: 8, bottom: 8),
       child: Text(
-        title,
+        title.toUpperCase(),
         style: const TextStyle(
-          fontSize: 14,
+          fontSize: 12,
           fontWeight: FontWeight.w700,
           color: Colors.grey,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -209,14 +207,22 @@ class _MenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: Colors.black87),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: Colors.black87, size: 20),
+      ),
       title: Text(
         title,
         style: const TextStyle(
           fontWeight: FontWeight.w500,
+          fontSize: 15,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded),
+      trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
       onTap: onTap,
     );
   }
