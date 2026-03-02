@@ -1,3 +1,4 @@
+//update onboarding_event.dart
 import 'package:equatable/equatable.dart';
 
 abstract class OnboardingEvent extends Equatable {

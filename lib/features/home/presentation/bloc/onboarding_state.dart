@@ -1,3 +1,4 @@
+//Update onboarding_state.dart
 import 'package:equatable/equatable.dart';
 
 abstract class OnboardingState extends Equatable {

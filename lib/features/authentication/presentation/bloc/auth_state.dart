@@ -8,12 +8,16 @@ abstract class AuthState extends Equatable {
   List<Object?> get props => [];
 }
 
-class AuthInitial extends AuthState {}
+class AuthInitial extends AuthState {
+  const AuthInitial(); // const එකතු කළා
+}
 
-class AuthLoading extends AuthState {}
+class AuthLoading extends AuthState {
+  const AuthLoading(); // const එකතු කළා
+}
 
 class Authenticated extends AuthState {
-  final User user;
+  final UserEntity user; // 'User' වෙනුවට 'UserEntity' ලෙස වෙනස් කළා
 
   const Authenticated({required this.user});
 
@@ -21,7 +25,9 @@ class Authenticated extends AuthState {
   List<Object?> get props => [user];
 }
 
-class Unauthenticated extends AuthState {}
+class Unauthenticated extends AuthState {
+  const Unauthenticated(); // const එකතු කළා
+}
 
 class AuthError extends AuthState {
   final String message;

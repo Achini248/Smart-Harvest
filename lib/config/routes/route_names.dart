@@ -1,46 +1,44 @@
 class RouteNames {
-  // Authentication
+  RouteNames._();
+
+  // Core
   static const String splash = '/';
   static const String onboarding = '/onboarding';
+  static const String home = '/home';
+
+  // Authentication
   static const String login = '/login';
   static const String signup = '/signup';
   static const String otpVerification = '/otp-verification';
-  
-  // Home
-  static const String home = '/home';
-  
-  // Profile
   static const String profileSettings = '/profile-settings';
-  static const String accountSettings = '/account-settings';
-  static const String helpSupport = '/help-support';
-  
-  // Crops
-  static const String cropsList = '/crops-list';
-  static const String cropDetail = '/crop-detail';
-  static const String addCrop = '/add-crop';
-  
-  // Marketplace
-  static const String marketplace = '/marketplace';
+
+  // Crop management (AppRouter එකේ තියෙන නම් වලට ගැලපෙන්න හැදුවා)
+  static const String myCrops = '/my-crops';      // 'cropsList' වෙනුවට
+  static const String addCrop = '/add-crop';      // අලුතින් එක් කළා
+  static const String cropDetails = '/crop-detail'; // 'cropDetail' වෙනුවට
+  static const String editCrop = '/edit-crop';
+
+  // Marketplace & prices
+  static const String marketplaceHome = '/marketplace';
   static const String myOrders = '/my-orders';
   static const String orderInbox = '/order-inbox';
-  
-  // Market Prices
-  static const String marketPrices = '/market-prices';
-  
+  static const String dailyMarketPrices = '/market-prices'; // 'marketPrices' වෙනුවට
+
   // Weather
-  static const String weather = '/weather';
-  
+  static const String weatherOverview = '/weather'; // 'weather' වෙනුවට
+
   // Notifications
   static const String notifications = '/notifications';
-  
+
   // Messaging
-  static const String messagesList = '/messages-list';
+  static const String messagesList = '/messages';
   static const String chat = '/chat';
-  
-  // Government Dashboard
+
+  // Account / help
+  static const String accountSettings = '/account-settings';
+  static const String helpSupport = '/help-support';
+
+  // Government dashboard & analytics
   static const String governmentDashboard = '/government-dashboard';
-  static const String surplusShortageMap = '/surplus-shortage-map';
-  
-  // Analytics
   static const String analytics = '/analytics';
 }

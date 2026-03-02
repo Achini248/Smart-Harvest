@@ -1,23 +1,18 @@
+//auth_remote_datasource.dart
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> login(String email, String password);
   Future<UserModel> register(String email, String password, String phoneNo);
-  Future<UserModel> signInWithGoogle(); // NEW
   Future<void> logout();
   Future<UserModel?> getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth firebaseAuth;
-  final GoogleSignIn googleSignIn; // NEW
 
-  AuthRemoteDataSourceImpl({
-    required this.firebaseAuth,
-    required this.googleSignIn, // NEW
-  });
+  AuthRemoteDataSourceImpl({required this.firebaseAuth});
 
   @override
   Future<UserModel> login(String email, String password) async {
@@ -64,51 +59,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  // NEW: Google Sign-In Implementation
-  @override
-  Future<UserModel> signInWithGoogle() async {
-    try {
-      // Trigger Google Sign-In flow
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      
-      if (googleUser == null) {
-        throw Exception('Google Sign-In cancelled');
-      }
-
-      // Obtain auth details
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      // Create Firebase credential
-      final credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Sign in to Firebase
-      final userCredential = await firebaseAuth.signInWithCredential(credential);
-
-      if (userCredential.user == null) {
-        throw Exception('Google Sign-In failed');
-      }
-
-      return UserModel(
-        id: userCredential.user!.uid,
-        email: userCredential.user!.email!,
-        name: userCredential.user!.displayName,
-        phoneNo: userCredential.user!.phoneNumber,
-        profilePhotoUrl: userCredential.user!.photoURL,
-      );
-    } catch (e) {
-      throw Exception('Google Sign-In failed: ${e.toString()}');
-    }
-  }
-
   @override
   Future<void> logout() async {
-    await Future.wait([
-      firebaseAuth.signOut(),
-      googleSignIn.signOut(), // Sign out from Google too
-    ]);
+    await firebaseAuth.signOut();
   }
 
   @override

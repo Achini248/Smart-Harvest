@@ -1,187 +1,84 @@
 import 'package:flutter/material.dart';
+import 'route_names.dart';
 import '../../features/authentication/presentation/pages/login_page.dart';
 import '../../features/authentication/presentation/pages/signup_page.dart';
+import '../../features/authentication/presentation/pages/otp_verification_page.dart';
 import '../../features/authentication/presentation/pages/profile_settings_page.dart';
-import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/home/presentation/pages/onboarding_page.dart';
 import '../../features/home/presentation/pages/splash_screen.dart';
-import 'route_names.dart';
+import '../../features/home/presentation/pages/onboarding_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/crop_management/presentation/pages/add_crop_page.dart';
+import '../../features/crop_management/presentation/pages/crops_list_page.dart';
+import '../../features/crop_management/presentation/pages/crop_detail_page.dart'; 
+import '../../features/marketplace/presentation/pages/marketplace_home_page.dart';
+import '../../features/marketplace/presentation/pages/my_orders_page.dart';
+import '../../features/marketplace/presentation/pages/order_inbox_page.dart';
+import '../../features/market_prices/presentation/pages/daily_market_prices_page.dart';
+import '../../features/weather/presentation/pages/weather_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/messaging/presentation/pages/messages_list_page.dart';
+import '../../features/messaging/presentation/pages/chat_page.dart';
+import '../../features/government_dashboard/presentation/pages/government_dashboard_page.dart';
+import '../../features/analytics/presentation/pages/analytics_page.dart';
 
 class AppRouter {
-  static Route<dynamic> generateRoute(RouteSettings settings) {
+  Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      // Authentication Routes
       case RouteNames.splash:
-        return MaterialPageRoute(builder: (_) => const SplashScreen());
-      
+        return _fade(const SplashScreen(), settings);
       case RouteNames.onboarding:
-        return MaterialPageRoute(builder: (_) => const OnboardingPage());
-      
-      case RouteNames.login:
-        return MaterialPageRoute(builder: (_) => const LoginPage());
-      
-      case RouteNames.signup:
-        return MaterialPageRoute(builder: (_) => const SignupPage());
-      
-      // Home Routes
+        return _slide(const OnboardingPage(), settings);
       case RouteNames.home:
-        return MaterialPageRoute(builder: (_) => const HomePage());
-      
-      // Profile Routes
-      // case RouteNames.profileSettings:
-      //   return MaterialPageRoute(builder: (_) => const ProfileSettingsPage());
-      
-      case RouteNames.accountSettings:
-        return _comingSoonRoute('Account Settings');
-      
-      case RouteNames.helpSupport:
-        return _comingSoonRoute('Help & Support');
-      
-      // Crop Routes (Coming Soon)
-      case RouteNames.cropsList:
-        return _comingSoonRoute('My Crops');
-      
+        return _fade(const HomePage(), settings);
+      case RouteNames.login:
+        return _slide(const LoginPage(), settings);
+      case RouteNames.signup:
+        return _slide(const SignupPage(), settings);
+      case RouteNames.profileSettings:
+        return _slide(const ProfileSettingsPage(), settings);
+      case RouteNames.myCrops:
+        return _slide(const CropsListPage(), settings); 
       case RouteNames.addCrop:
-        return _comingSoonRoute('Add Crop');
-      
-      case RouteNames.cropDetail:
-        return _comingSoonRoute('Crop Details');
-      
-      // Marketplace Routes
-      case RouteNames.marketplace:
-        return _comingSoonRoute('Marketplace');
-      
-      case RouteNames.myOrders:
-        return _comingSoonRoute('My Orders');
-      
-      case RouteNames.orderInbox:
-        return _comingSoonRoute('Order Inbox');
-      
-      // Market Prices Routes
-      case RouteNames.marketPrices:
-        return _comingSoonRoute('Market Prices');
-      
-      // Weather Routes
-      case RouteNames.weather:
-        return _comingSoonRoute('Weather');
-      
-      // Notifications Routes
-      case RouteNames.notifications:
-        return _comingSoonRoute('Notifications');
-      
-      // Messaging Routes
-      case RouteNames.messagesList:
-        return _comingSoonRoute('Messages');
-      
-      case RouteNames.chat:
-        return _comingSoonRoute('Chat');
-      
-      // Government Dashboard Routes
-      case RouteNames.governmentDashboard:
-        return _comingSoonRoute('Government Dashboard');
-      
-      case RouteNames.surplusShortageMap:
-        return _comingSoonRoute('Surplus/Shortage Map');
-      
-      // Analytics Routes
-      case RouteNames.analytics:
-        return _comingSoonRoute('Analytics');
-      
+        return _slide(const AddCropPage(), settings);
+      case RouteNames.cropDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _slide(
+          CropDetailPage(crop: args?['crop']), 
+          settings,
+        );
+      case RouteNames.marketplaceHome:
+        return _slide(const MarketplaceHomePage(), settings);
+      case RouteNames.dailyMarketPrices:
+        return _slide(const DailyMarketPricesPage(), settings);
       default:
-        return _errorRoute('No route defined for ${settings.name}');
+        return _unknownRoute(settings);
     }
   }
 
-  // Error Route
-  static Route<dynamic> _errorRoute(String message) {
-    return MaterialPageRoute(
-      builder: (_) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Error'),
-          backgroundColor: Colors.red,
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  color: Colors.red,
-                  size: 80,
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Route Error',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+  Route<dynamic> _fade(Widget page, RouteSettings settings) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c),
     );
   }
 
-  // Coming Soon Route
-  static Route<dynamic> _comingSoonRoute(String featureName) {
+  Route<dynamic> _slide(Widget page, RouteSettings settings) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (_, a, __, c) {
+        return SlideTransition(
+          position: Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(a),
+          child: c,
+        );
+      },
+    );
+  }
+
+  Route<dynamic> _unknownRoute(RouteSettings settings) {
     return MaterialPageRoute(
-      builder: (_) => Scaffold(
-        appBar: AppBar(
-          title: Text(featureName),
-          backgroundColor: const Color(0xFF4CAF50),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.construction,
-                  color: Colors.orange,
-                  size: 100,
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  featureName,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Coming Soon!',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'This feature is under development',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      builder: (_) => Scaffold(body: Center(child: Text('Route not found'))),
     );
   }
 }
