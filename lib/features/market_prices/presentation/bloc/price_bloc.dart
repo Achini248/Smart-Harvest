@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../core/errors/failures.dart';
 import '../../domain/entities/price.dart'; 
 import '../../domain/usecases/get_daily_prices_usecase.dart';
 import '../../domain/usecases/get_price_trends_usecase.dart';
@@ -18,34 +20,31 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
     on<SearchPricesEvent>(_onSearch);
   }
 
+  // UseCase එකෙන් කෙලින්ම List<PriceEntity> එකක් එන නිසා try-catch පාවිච්චි කරයි
   Future<void> _onLoadDailyPrices(
     LoadDailyPricesEvent event,
     Emitter<PriceState> emit,
   ) async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     
-    final result = await getDailyPrices();
-    
-    // වැදගත්: මෙහි 'return' keyword එක පාවිච්චි නොකරන්න. 
-    // එය "Null Function" error එකට හේතු වේ.
-    result.fold(
-      (failure) {
-        emit(state.copyWith(
-          isLoading: false, 
-          errorMessage: 'Failed to load prices'
-        ));
-      },
-      (pricesList) {
-        emit(state.copyWith(
-          isLoading: false,
-          allPrices: pricesList,
-          filteredPrices: pricesList,
-          errorMessage: pricesList.isEmpty ? 'No prices available today.' : null,
-        ));
-      },
-    );
+    try {
+      final List<PriceEntity> pricesList = await getDailyPrices();
+      
+      emit(state.copyWith(
+        isLoading: false,
+        allPrices: pricesList,
+        filteredPrices: pricesList,
+        errorMessage: pricesList.isEmpty ? 'අද දින මිල ගණන් දත්ත නොමැත.' : null,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        isLoading: false,
+        errorMessage: 'දත්ත ලබාගැනීමේදී දෝෂයක් සිදුවිය: ${e.toString()}',
+      ));
+    }
   }
 
+  // UseCase එකෙන් Either<Failure, Map> එකක් එන නිසා fold පාවිච්චි කරයි
   Future<void> _onLoadTrends(
     LoadPriceTrendsEvent event,
     Emitter<PriceState> emit,
@@ -53,12 +52,12 @@ class PriceBloc extends Bloc<PriceEvent, PriceState> {
     final result = await getPriceTrends(event.productName);
     
     result.fold(
-      (failure) {
+      (Failure f) {
         emit(state.copyWith(
-          errorMessage: 'Could not load trends for ${event.productName}'
+          errorMessage: 'මිල ප්‍රවණතා ලබාගත නොහැක: ${f.message}'
         ));
       },
-      (trendsMap) {
+      (Map<DateTime, double> trendsMap) {
         emit(state.copyWith(
           trends: trendsMap,
           selectedProduct: event.productName,
