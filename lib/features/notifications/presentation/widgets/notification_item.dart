@@ -36,7 +36,7 @@ class NotificationItem extends StatelessWidget {
                   children: [
                     Text(
                       notification.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         color: AppColors.textPrimary,
@@ -45,16 +45,16 @@ class NotificationItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       notification.body,
-                      style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Icon(Icons.access_time, size: 14, color: AppColors.textSecondary),
+                        const Icon(Icons.access_time, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
                         Text(
                           _formatTimeAgo(notification.createdAt),
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                         ),
                         const Spacer(),
                         if (!notification.isRead)

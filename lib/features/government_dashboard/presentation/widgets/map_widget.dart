@@ -17,7 +17,7 @@ class MapWidget extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(20),
@@ -26,24 +26,24 @@ class MapWidget extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.map_outlined, color: AppColors.primaryGreen),
+                const Icon(Icons.map_outlined, color: AppColors.primaryGreen),
                 const SizedBox(width: 12),
                 const Expanded(child: Text('Sri Lanka Agriculture Map', style: TextStyle(fontWeight: FontWeight.w700))),
-                IconButton(icon: Icon(Icons.layers), onPressed: () {}),
+                IconButton(icon: const Icon(Icons.layers), onPressed: () {}),
               ],
             ),
           ),
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(32),
-              child: Column(
+              child: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.map_outlined, size: 80, color: AppColors.textSecondary),
-                  const SizedBox(height: 24),
-                  const Text('Interactive Map', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 16),
-                  const Text(
+                  SizedBox(height: 24),
+                  Text('Interactive Map', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+                  SizedBox(height: 16),
+                  Text(
                     'District-wise surplus/shortage\nPinch to zoom, tap for details',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: AppColors.textSecondary),

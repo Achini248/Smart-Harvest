@@ -1,4 +1,3 @@
-import '../../../../core/errors/failures.dart';
 import '../entities/notification.dart';
 
 abstract class NotificationRepository {

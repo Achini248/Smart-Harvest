@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/weather.dart';
+import '../../domain/entities/weather_forecast.dart';
 
 abstract class WeatherState extends Equatable {
   @override

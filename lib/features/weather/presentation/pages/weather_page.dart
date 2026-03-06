@@ -6,7 +6,6 @@ import '../bloc/weather_bloc.dart';
 import '../bloc/weather_event.dart';
 import '../bloc/weather_state.dart';
 import '../widgets/weather_card.dart';
-import '../domain/entities/weather.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -19,7 +18,15 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   void initState() {
     super.initState();
-    context.read<WeatherBloc>().add(LoadWeatherEvent('Negombo'));
+
+    // Delay dispatch to ensure Bloc is available in context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<WeatherBloc>().add(
+              LoadWeatherEvent('Negombo'),
+            );
+      }
+    });
   }
 
   IconData _weatherIcon(String condition) {
@@ -43,7 +50,11 @@ class _WeatherPageState extends State<WeatherPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<WeatherBloc>().add(LoadWeatherEvent('Negombo')),
+            onPressed: () {
+              context.read<WeatherBloc>().add(
+                    LoadWeatherEvent('Negombo'),
+                  );
+            },
           ),
         ],
       ),
@@ -62,7 +73,11 @@ class _WeatherPageState extends State<WeatherPage> {
                   Text(state.message),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () => context.read<WeatherBloc>().add(LoadWeatherEvent('Negombo')),
+                    onPressed: () {
+                      context.read<WeatherBloc>().add(
+                            LoadWeatherEvent('Negombo'),
+                          );
+                    },
                     child: const Text('Retry'),
                   ),
                 ],

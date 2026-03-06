@@ -9,7 +9,7 @@ import '../../../authentication/presentation/bloc/auth_event.dart';
 import '../../../authentication/presentation/bloc/auth_state.dart';
 
 class DrawerMenu extends StatelessWidget {
-  const DrawerMenu({super.key}); // මෙතන const එකතු කළා
+  const DrawerMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class DrawerMenu extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildHeader(context),
-            const Divider(), // const එක් කළා
+            const Divider(),
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
@@ -113,8 +113,8 @@ class DrawerMenu extends StatelessWidget {
         String email = '';
 
         if (state is Authenticated) {
-          name = state.user.name ?? name;
-          email = state.user.email;
+          name = state.displayName ?? 'User';
+          email = state.email ?? '';
         }
 
         return UserAccountsDrawerHeader(

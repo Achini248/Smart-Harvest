@@ -16,7 +16,7 @@ class SurplusShortageMapPage extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _LegendItem(color: Colors.green, label: 'Surplus', value: '+15%'),

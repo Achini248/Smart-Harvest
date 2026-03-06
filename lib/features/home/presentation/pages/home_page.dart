@@ -30,30 +30,41 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppStrings.appName,
-          style: AppTextStyles.heading3,
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              Navigator.pushNamed(context, RouteNames.notifications);
-            },
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is Unauthenticated) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            RouteNames.login,
+            (route) => false,
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            AppStrings.appName,
+            style: AppTextStyles.heading3,
           ),
-        ],
-      ),
-      drawer: const DrawerMenu(),
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {
+                Navigator.pushNamed(context, RouteNames.notifications);
+              },
+            ),
+          ],
+        ),
+        drawer: const DrawerMenu(),
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: BottomNavBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+        ),
       ),
     );
   }
@@ -279,7 +290,6 @@ class ProfileTabView extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 24),
-                  // Profile Avatar
                   const CircleAvatar(
                     radius: 60,
                     backgroundColor: AppColors.primaryGreenLight,
@@ -291,19 +301,17 @@ class ProfileTabView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    state.user.name ?? 'User',
+                    state.displayName ?? 'User',
                     style: AppTextStyles.heading2,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    state.user.email,
+                    state.email ?? '',
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Profile Options
                   _buildProfileOption(
                     context,
                     'Profile Settings',
@@ -345,7 +353,25 @@ class ProfileTabView extends StatelessWidget {
             ),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+
+        if (state is AuthLoading || state is AuthInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is AuthError) {
+          return Center(
+            child: Text(
+              state.message,
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        }
+
+        if (state is Unauthenticated) {
+          return const Center(child: Text('Not logged in'));
+        }
+
+        return const SizedBox.shrink();
       },
     );
   }
@@ -406,7 +432,7 @@ class ProfileTabView extends StatelessWidget {
                       ),
                     ),
                     child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Text(
                         'Cancel',
                         style: AppTextStyles.bodyTextBold,

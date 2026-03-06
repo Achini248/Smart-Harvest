@@ -101,14 +101,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.notifications_off_outlined, size: 64, color: AppColors.textSecondary),
-          const SizedBox(height: 16),
-          const Text('No notifications', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          SizedBox(height: 16),
+          Text('No notifications', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          SizedBox(height: 8),
           Text('You\'ll see order updates, price changes and weather alerts here', style: TextStyle(color: AppColors.textSecondary)),
         ],
       ),
@@ -120,7 +120,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: AppColors.error),
+          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
           const SizedBox(height: 16),
           Text(message, style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 24),

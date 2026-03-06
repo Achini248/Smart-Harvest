@@ -142,15 +142,15 @@ class _GovernmentDashboardPageState extends State<GovernmentDashboardPage> {
       ),
       child: Row(
         children: [
-          Icon(Icons.trending_up, color: AppColors.primaryGreen, size: 32),
+          const Icon(Icons.trending_up, color: AppColors.primaryGreen, size: 32),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('National Surplus Index', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                const Text('National Surplus Index', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 Text('${stats.nationalSurplusIndex.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                Text('${stats.surplusRegions} Surplus | ${stats.shortageRegions} Shortage', style: TextStyle(color: AppColors.primaryGreen)),
+                Text('${stats.surplusRegions} Surplus | ${stats.shortageRegions} Shortage', style: const TextStyle(color: AppColors.primaryGreen)),
               ],
             ),
           ),

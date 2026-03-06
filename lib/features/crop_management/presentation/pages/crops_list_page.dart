@@ -20,7 +20,11 @@ class _CropsListPageState extends State<CropsListPage> {
   @override
   void initState() {
     super.initState();
-    context.read<CropBloc>().add(const LoadCropsEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<CropBloc>().add(const LoadCropsEvent());
+      }
+    });
   }
 
   void _showSnack(String message, {bool isError = false}) {
@@ -178,7 +182,7 @@ class _CropsListPageState extends State<CropsListPage> {
                       crop: crop,
                       onTap: () => Navigator.pushNamed(
                         context,
-                        RouteNames.cropDetails,
+                        RouteNames.cropDetail,
                         arguments: crop,
                       ),
                       onEdit: () => Navigator.pushNamed(

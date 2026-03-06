@@ -1,89 +1,87 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-// UserEntity එක තියෙන තැන import එක නිවැරදිද බලන්න
-import '../../domain/entities/user.dart'; 
-import '../../domain/repositories/auth_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository authRepository;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  late final StreamSubscription<User?> _authSubscription;
 
-  // const අයින් කළා
-  AuthBloc({required this.authRepository}) : super(AuthInitial()) {
+  AuthBloc() : super(const AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
     on<LogoutEvent>(_onLogout);
-    on<CheckAuthStatusEvent>(_onCheckAuthStatus);
+
+    // 🔥 Listen to Firebase auth state directly
+    _authSubscription =
+        _firebaseAuth.authStateChanges().listen((user) {
+          if (user != null) {
+            emit(
+              Authenticated(
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+              ),
+            );
+          } else {
+            emit(const Unauthenticated());
+          }
+        });
   }
 
+  // ---------------- LOGIN ----------------
   Future<void> _onLogin(
-    LoginEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading()); // const අයින් කළා
+      LoginEvent event,
+      Emitter<AuthState> emit,
+      ) async {
+    emit(const AuthLoading());
+
     try {
-      // Repository එකේ login function එකේ arguments පිළිවෙළ බලන්න
-      final result = await authRepository.login(event.email, event.password);
-      
-      // Dartz (Either) පාවිච්චි කරනවා නම් fold කරන්න ඕනේ
-      result.fold(
-        (failure) => emit(AuthError(message: failure.message)),
-        (user) => emit(Authenticated(user: user)),
+      await _firebaseAuth.signInWithEmailAndPassword(
+        email: event.email,
+        password: event.password,
       );
+      // No manual emit — stream handles it
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(message: e.message ?? "Login error"));
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
   }
 
+  // ---------------- REGISTER ----------------
   Future<void> _onRegister(
-    RegisterEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading()); // const අයින් කළා
-    try {
-      // Repository එකේ register function එකට values යවනවා
-      final result = await authRepository.register(
-        event.email,
-        event.password,
-        event.phoneNo, // event එකේ තියෙන parameters පාවිච්චි කරන්න
-      );
+      RegisterEvent event,
+      Emitter<AuthState> emit,
+      ) async {
+    emit(const AuthLoading());
 
-      result.fold(
-        (failure) => emit(AuthError(message: failure.message)),
-        (user) => emit(Authenticated(user: user)),
+    try {
+      await _firebaseAuth.createUserWithEmailAndPassword(
+        email: event.email,
+        password: event.password,
       );
+      // Stream handles state
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(message: e.message ?? "Registration error"));
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
   }
 
+  // ---------------- LOGOUT ----------------
   Future<void> _onLogout(
-    LogoutEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading()); // const අයින් කළා
-    try {
-      await authRepository.logout();
-      emit(Unauthenticated()); // const අයින් කළා
-    } catch (e) {
-      emit(AuthError(message: e.toString()));
-    }
+      LogoutEvent event,
+      Emitter<AuthState> emit,
+      ) async {
+    await _firebaseAuth.signOut();
+    // Stream handles state
   }
 
-  Future<void> _onCheckAuthStatus(
-    CheckAuthStatusEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      final user = await authRepository.getCurrentUser();
-      if (user != null) {
-        emit(Authenticated(user: user));
-      } else {
-        emit(Unauthenticated()); // const අයින් කළා
-      }
-    } catch (_) {
-      emit(Unauthenticated()); // const අයින් කළා
-    }
+  @override
+  Future<void> close() {
+    _authSubscription.cancel();
+    return super.close();
   }
 }

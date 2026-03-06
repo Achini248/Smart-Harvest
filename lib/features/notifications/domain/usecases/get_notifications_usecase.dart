@@ -1,4 +1,3 @@
-import '../../../../core/errors/failures.dart';
 import '../entities/notification.dart';
 import '../repositories/notification_repository.dart';
 

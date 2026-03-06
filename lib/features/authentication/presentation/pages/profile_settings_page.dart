@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/user.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -21,26 +20,34 @@ class ProfileSettingsPage extends StatelessWidget {
       body: SafeArea(
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
-            UserEntity? user;
-            if (state is Authenticated) {
-              user = state.user;
+
+            if (state is! Authenticated) {
+              return const Center(child: CircularProgressIndicator());
             }
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _ProfileHeader(user: user),
+                  child: _ProfileHeader(
+                    name: state.displayName ?? 'User',
+                    email: state.email ?? '',
+                  ),
                 ),
+
                 const SizedBox(height: 24),
+
                 const _SectionTitle(title: 'Account Settings'),
+
                 _MenuItem(
                   icon: Icons.person_outline,
                   title: 'My Profile',
                   onTap: () {},
                 ),
+
                 _MenuItem(
                   icon: Icons.agriculture_outlined,
                   title: 'My Crops',
@@ -48,6 +55,7 @@ class ProfileSettingsPage extends StatelessWidget {
                     Navigator.pushNamed(context, RouteNames.myCrops);
                   },
                 ),
+
                 _MenuItem(
                   icon: Icons.shopping_cart_outlined,
                   title: 'My Orders',
@@ -55,12 +63,15 @@ class ProfileSettingsPage extends StatelessWidget {
                     Navigator.pushNamed(context, RouteNames.myOrders);
                   },
                 ),
+
                 _MenuItem(
                   icon: Icons.support_agent_outlined,
                   title: 'Customer Support',
                   onTap: () {},
                 ),
+
                 const Spacer(),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 24),
@@ -69,18 +80,11 @@ class ProfileSettingsPage extends StatelessWidget {
                     height: 52,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // මෙතන තිබුණු 'const' ඉවත් කළා
-                        context.read<AuthBloc>().add(LogoutEvent());
-                        
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          RouteNames.login,
-                          (_) => false,
-                        );
+                        context.read<AuthBloc>().add(const LogoutEvent());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
-                        foregroundColor: Colors.white, // Text සහ Icon වල පාට
+                        foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
@@ -107,15 +111,16 @@ class ProfileSettingsPage extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  final UserEntity? user;
-  const _ProfileHeader({required this.user});
+  final String name;
+  final String email;
+
+  const _ProfileHeader({
+    required this.name,
+    required this.email,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // UserEntity එකේ property names ඔබේ entity එකට ගැලපෙන ලෙස මෙහි දමා ඇත
-    final name = user?.name ?? 'Smart Harvest User';
-    final email = user?.email ?? '';
-
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -174,6 +179,7 @@ class _ProfileHeader extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   final String title;
+
   const _SectionTitle({required this.title});
 
   @override

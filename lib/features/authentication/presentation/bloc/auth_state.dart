@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/user.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -9,24 +8,30 @@ abstract class AuthState extends Equatable {
 }
 
 class AuthInitial extends AuthState {
-  const AuthInitial(); // const එකතු කළා
+  const AuthInitial();
 }
 
 class AuthLoading extends AuthState {
-  const AuthLoading(); // const එකතු කළා
+  const AuthLoading();
 }
 
 class Authenticated extends AuthState {
-  final UserEntity user; // 'User' වෙනුවට 'UserEntity' ලෙස වෙනස් කළා
+  final String uid;
+  final String? email;
+  final String? displayName;
 
-  const Authenticated({required this.user});
+  const Authenticated({
+    required this.uid,
+    this.email,
+    this.displayName,
+  });
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [uid, email, displayName];
 }
 
 class Unauthenticated extends AuthState {
-  const Unauthenticated(); // const එකතු කළා
+  const Unauthenticated();
 }
 
 class AuthError extends AuthState {

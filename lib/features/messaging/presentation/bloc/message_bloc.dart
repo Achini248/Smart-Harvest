@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/message.dart';
 import '../../domain/usecases/send_message_usecase.dart';
 import '../../domain/usecases/get_messages_usecase.dart';
 import '../../domain/repositories/message_repository.dart';
@@ -52,7 +51,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     await _messagesSub?.cancel();
 
     emit(ChatOpenState(
-        conversationId: e.conversationId, messages: []));
+        conversationId: e.conversationId, messages: const []));
 
     // Subscribe to real-time stream
     _messagesSub = _getMessages(
@@ -61,7 +60,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
       (result) {
         result.fold(
           (f) => add(
-              ClearMessageErrorEvent()), // silently handle stream errors
+              const ClearMessageErrorEvent()), // silently handle stream errors
           (messages) => add(
               MessageReceivedEvent(messages: messages)),
         );

@@ -41,52 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAw3XNDzKHumfFjsXE5Rs6qFAwzRgMIL6Q',
-    appId: '1:681147882409:web:55e02867f2737cbfc2c2b8',
-    messagingSenderId: '681147882409',
-    projectId: 'smart-harvest-1fb37',
-    authDomain: 'smart-harvest-1fb37.firebaseapp.com',
-    storageBucket: 'smart-harvest-1fb37.firebasestorage.app',
-    measurementId: 'G-G6MWGQR9EV',
+    apiKey: 'AIzaSyD1BUJ9OZz5rDcRA3w5dlxO2ufhfgJykSA',
+    appId: '1:75661978047:web:fd3fbda2ea6bc572c1590a',
+    messagingSenderId: '75661978047',
+    projectId: 'smart-harvest-f27d4',
+    authDomain: 'smart-harvest-f27d4.firebaseapp.com',
+    storageBucket: 'smart-harvest-f27d4.firebasestorage.app',
+    measurementId: 'G-0LWYLNRRBP',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDAAnCkLqF1INkNjYgop44EG2KJgyWBCHM',
-    appId: '1:681147882409:android:c3f9476ed4e4e7dbc2c2b8',
-    messagingSenderId: '681147882409',
-    projectId: 'smart-harvest-1fb37',
-    storageBucket: 'smart-harvest-1fb37.firebasestorage.app',
+    apiKey: 'AIzaSyDOl0lumNZ9a7SKiDUFUuDhDW6ca7UFcYQ',
+    appId: '1:75661978047:android:2351804904e3bcc9c1590a',
+    messagingSenderId: '75661978047',
+    projectId: 'smart-harvest-f27d4',
+    storageBucket: 'smart-harvest-f27d4.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB2rGTX_vqYo-K9g8F0x9aBvuDEXW2h_To',
-    appId: '1:681147882409:ios:56193e1356a73f61c2c2b8',
-    messagingSenderId: '681147882409',
-    projectId: 'smart-harvest-1fb37',
-    storageBucket: 'smart-harvest-1fb37.firebasestorage.app',
-    androidClientId: '681147882409-85i25imknaivo09np4mv88u0m4tdpeb5.apps.googleusercontent.com',
-    iosClientId: '681147882409-k7j6evrjl0en9hc1ne5lld9c4arkpu5e.apps.googleusercontent.com',
+    apiKey: 'AIzaSyCE1kD15Td9NhkA_pz0VNE77aTzAXHByW4',
+    appId: '1:75661978047:ios:e93412020958f169c1590a',
+    messagingSenderId: '75661978047',
+    projectId: 'smart-harvest-f27d4',
+    storageBucket: 'smart-harvest-f27d4.firebasestorage.app',
     iosBundleId: 'com.example.smartHarvest',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyB2rGTX_vqYo-K9g8F0x9aBvuDEXW2h_To',
-    appId: '1:681147882409:ios:56193e1356a73f61c2c2b8',
-    messagingSenderId: '681147882409',
-    projectId: 'smart-harvest-1fb37',
-    storageBucket: 'smart-harvest-1fb37.firebasestorage.app',
-    androidClientId: '681147882409-85i25imknaivo09np4mv88u0m4tdpeb5.apps.googleusercontent.com',
-    iosClientId: '681147882409-k7j6evrjl0en9hc1ne5lld9c4arkpu5e.apps.googleusercontent.com',
+    apiKey: 'AIzaSyCE1kD15Td9NhkA_pz0VNE77aTzAXHByW4',
+    appId: '1:75661978047:ios:e93412020958f169c1590a',
+    messagingSenderId: '75661978047',
+    projectId: 'smart-harvest-f27d4',
+    storageBucket: 'smart-harvest-f27d4.firebasestorage.app',
     iosBundleId: 'com.example.smartHarvest',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAw3XNDzKHumfFjsXE5Rs6qFAwzRgMIL6Q',
-    appId: '1:681147882409:web:209b195d4f70f9b5c2c2b8',
-    messagingSenderId: '681147882409',
-    projectId: 'smart-harvest-1fb37',
-    authDomain: 'smart-harvest-1fb37.firebaseapp.com',
-    storageBucket: 'smart-harvest-1fb37.firebasestorage.app',
-    measurementId: 'G-C92VK2C2JD',
+    apiKey: 'AIzaSyD1BUJ9OZz5rDcRA3w5dlxO2ufhfgJykSA',
+    appId: '1:75661978047:web:0fe81f8dd0793dd0c1590a',
+    messagingSenderId: '75661978047',
+    projectId: 'smart-harvest-f27d4',
+    authDomain: 'smart-harvest-f27d4.firebaseapp.com',
+    storageBucket: 'smart-harvest-f27d4.firebasestorage.app',
+    measurementId: 'G-HGPLTPFWXC',
   );
 }

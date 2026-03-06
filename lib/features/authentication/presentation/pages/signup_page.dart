@@ -41,7 +41,6 @@ class _SignupPageState extends State<SignupPage> {
             RegisterEvent(
               email: _emailController.text.trim(),
               password: _passwordController.text,
-              phoneNo: _phoneController.text.trim(),
             ),
           );
     }

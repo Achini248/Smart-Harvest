@@ -7,7 +7,6 @@ import '../bloc/crop_bloc.dart';
 import '../bloc/crop_event.dart';
 import '../bloc/crop_state.dart';
 import '../widgets/crop_form.dart';
-import '../../domain/entities/crop.dart';
 
 class AddCropPage extends StatelessWidget {
   const AddCropPage({super.key});

@@ -1,4 +1,4 @@
-import '../entities/weather.dart';
+import '../entities/weather_forecast.dart';
 import '../repositories/weather_repository.dart';
 
 class GetWeatherForecastUseCase {

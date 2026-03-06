@@ -206,10 +206,10 @@ class _CropFormState extends State<CropForm> {
           const SizedBox(height: 16),
 
           // ── Crop type dropdown ────────────────────────────────────────
-          _SectionLabel(label: 'Crop Type'),
+          const _SectionLabel(label: 'Crop Type'),
           const SizedBox(height: 8),
           DropdownButtonFormField<CropType>(
-            value: _selectedType,
+            initialValue: _selectedType,
             decoration: _inputDecoration(
               label: '',
               hint: 'Select type',
@@ -266,7 +266,7 @@ class _CropFormState extends State<CropForm> {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _selectedUnit,
+                  initialValue: _selectedUnit,
                   decoration: _inputDecoration(
                     label: 'Unit',
                     hint: 'kg',
@@ -312,7 +312,7 @@ class _CropFormState extends State<CropForm> {
           const SizedBox(height: 16),
 
           // ── Planted date ──────────────────────────────────────────────
-          _SectionLabel(label: 'Planted Date'),
+          const _SectionLabel(label: 'Planted Date'),
           const SizedBox(height: 8),
           InkWell(
             onTap: widget.isLoading
@@ -350,7 +350,7 @@ class _CropFormState extends State<CropForm> {
           const SizedBox(height: 16),
 
           // ── Expected harvest date ─────────────────────────────────────
-          _SectionLabel(label: 'Expected Harvest Date (Optional)'),
+          const _SectionLabel(label: 'Expected Harvest Date (Optional)'),
           const SizedBox(height: 8),
           InkWell(
             onTap: widget.isLoading
@@ -406,10 +406,10 @@ class _CropFormState extends State<CropForm> {
 
           // ── Status (edit mode only) ───────────────────────────────────
           if (_isEditMode) ...[
-            _SectionLabel(label: 'Status'),
+            const _SectionLabel(label: 'Status'),
             const SizedBox(height: 8),
             DropdownButtonFormField<CropStatus>(
-              value: _selectedStatus,
+              initialValue: _selectedStatus,
               decoration: _inputDecoration(
                 label: '',
                 hint: 'Select status',

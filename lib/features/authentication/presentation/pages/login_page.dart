@@ -34,11 +34,11 @@ class _LoginPageState extends State<LoginPage> {
   void _onLoginPressed() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-            LoginEvent(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-            ),
-          );
+        LoginEvent(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        ),
+      );
     }
   }
 
@@ -49,8 +49,14 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
-            Navigator.pushReplacementNamed(context, RouteNames.home);
-          } else if (state is AuthError) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              RouteNames.home,
+                  (route) => false,
+            );
+          }
+
+          if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -63,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                // Top Green Pattern
+                // Top Section
                 Container(
                   height: 200,
                   decoration: const BoxDecoration(
@@ -73,26 +79,15 @@ class _LoginPageState extends State<LoginPage> {
                       bottomRight: Radius.circular(100),
                     ),
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 40),
-                        // Logo placeholder
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.eco,
-                            size: 40,
-                            color: AppColors.primaryGreen,
-                          ),
-                        ),
-                      ],
+                  child: const Center(
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: AppColors.white,
+                      child: Icon(
+                        Icons.eco,
+                        size: 40,
+                        color: AppColors.primaryGreen,
+                      ),
                     ),
                   ),
                 ),
@@ -120,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 40),
 
-                        // Email Field
+                        // Email
                         CustomTextField(
                           labelText: AppStrings.email,
                           hintText: 'demo@email.com',
@@ -139,10 +134,10 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 24),
 
-                        // Password Field
+                        // Password
                         CustomTextField(
                           labelText: AppStrings.password,
-                          hintText: 'enter your password',
+                          hintText: 'Enter your password',
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           prefixIcon: const Icon(Icons.lock_outline),
@@ -170,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Remember Me & Forgot Password
+                        // Remember Me
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -192,9 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                               ],
                             ),
                             TextButton(
-                              onPressed: () {
-                                // Navigate to forgot password
-                              },
+                              onPressed: () {},
                               child: Text(
                                 AppStrings.forgotPassword,
                                 style: AppTextStyles.linkText,
@@ -209,14 +202,15 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context, state) {
                             return CustomButton(
                               text: AppStrings.login,
-                              onPressed: _onLoginPressed,
+                              onPressed:
+                              state is AuthLoading ? null : _onLoginPressed,
                               isLoading: state is AuthLoading,
                             );
                           },
                         ),
                         const SizedBox(height: 24),
 
-                        // Sign Up Link
+                        // Sign Up
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -226,7 +220,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pushNamed(context, RouteNames.signup);
+                                Navigator.pushNamed(
+                                    context, RouteNames.signup);
                               },
                               child: Text(
                                 AppStrings.signUp,
