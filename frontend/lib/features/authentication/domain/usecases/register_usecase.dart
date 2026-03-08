@@ -8,7 +8,7 @@ class RegisterUseCase {
   final AuthRepository repository;
   const RegisterUseCase(this.repository);
 
-  // මෙතන params.phoneNumber දැන් නිවැරදිව වැඩ කරයි
+  
   Future<Either<Failure, UserEntity>> call(RegisterParams params) =>
       repository.register(params.email, params.password, params.phoneNumber);
 }
@@ -17,13 +17,13 @@ class RegisterParams extends Equatable {
   final String email;
   final String password;
   final String displayName;
-  final String phoneNumber; // මේක අලුතින් ඇතුළත් කළා
+  final String phoneNumber; 
 
   const RegisterParams({
     required this.email,
     required this.password,
     required this.displayName,
-    required this.phoneNumber, // Constructor එකටත් ඇතුළත් කළා
+    required this.phoneNumber, 
   });
 
   @override
