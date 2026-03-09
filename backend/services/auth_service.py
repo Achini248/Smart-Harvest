@@ -1,43 +1,109 @@
-from models.user_model import db, User
-from flask_jwt_extended import create_access_token
+from datetime import datetime, timezone
+from typing import Optional, Tuple
 
-# Function to register a new user
-def register_user(username, email, password):
-    
-    # Check if a user with the same email already exists in the database
-    if User.query.filter_by(email=email).first():
-        return {"error": "User with this email already exists"}, 400
-    
-    # Create a new User object
-    new_user = User(username=username, email=email)
-    
-    # Hash and set the user's password
-    new_user.set_password(password)
-    
-    # Add the new user to the database session
-    db.session.add(new_user)
-    
-    # Commit the changes to save the user in the database
-    db.session.commit()
-    
-    # Return success message
-    return {"message": "User registered successfully!"}, 201
+import jwt
+from bson import ObjectId
 
+from config import Config
+from database import users_collection
+from models.user_model import UserModel
+from utils.validators import is_valid_email, is_strong_password
+from utils.logger import logger
 
-# Function to authenticate a user during login
-def login_user(email, password):
-    
-    # Search for the user in the database using the email
-    user = User.query.filter_by(email=email).first()
-    
-    # Check if the user exists and if the password is correct
-    if user and user.check_password(password):
-        
-        # Generate a JWT access token using the user ID
-        token = create_access_token(identity=str(user.id))
-        
-        # Return the token and username to the client
-        return {"token": token, "username": user.username}, 200
-    
-    # Return error if email or password is incorrect
-    return {"error": "Invalid email or password"}, 401
+class AuthService:
+    @staticmethod
+    def _generate_token(user_id: str) -> str:
+        payload = {
+            "sub": user_id,
+            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(timezone.utc) + Config.JWT_ACCESS_TOKEN_EXPIRES,
+        }
+        return jwt.encode(payload, Config.JWT_SECRET_KEY, algorithm=Config.JWT_ALGORITHM)
+
+    @staticmethod
+    def decode_token(token: str) -> Optional[str]:
+        try:
+            decoded = jwt.decode(
+                token,
+                Config.JWT_SECRET_KEY,
+                algorithms=[Config.JWT_ALGORITHM],
+            )
+            return decoded.get("sub")
+        except jwt.PyJWTError as e:
+            logger.warning(f"Invalid token: {e}")
+            return None
+
+    @staticmethod
+    def register_user(
+        name: str,
+        email: str,
+        password: str,
+        role: str = "farmer",
+        phone: Optional[str] = None,
+    ) -> Tuple[Optional[dict], Optional[str]]:
+        if not is_valid_email(email):
+            return None, "Invalid email format."
+        if not is_strong_password(password):
+            return None, "Password too weak."
+
+        existing = users_collection.find_one({"email": email.lower()})
+        if existing:
+            return None, "Email already registered."
+
+        hashed = UserModel.hash_password(password)
+        doc = {
+            "name": name,
+            "email": email.lower(),
+            "role": role,
+            "phone": phone,
+            "password_hash": hashed,
+            "created_at": datetime.utcnow(),
+        }
+        result = users_collection.insert_one(doc)
+        user = {
+            "id": str(result.inserted_id),
+            "name": name,
+            "email": email.lower(),
+            "role": role,
+            "phone": phone,
+        }
+        token = AuthService._generate_token(user["id"])
+        return {"user": user, "token": token}, None
+
+    @staticmethod
+    def login_user(email: str, password: str) -> Tuple[Optional[dict], Optional[str]]:
+        if not is_valid_email(email):
+            return None, "Invalid email or password."
+
+        doc = users_collection.find_one({"email": email.lower()})
+        if not doc:
+            return None, "Invalid email or password."
+
+        if not UserModel.verify_password(password, doc["password_hash"]):
+            return None, "Invalid email or password."
+
+        user = {
+            "id": str(doc["_id"]),
+            "name": doc["name"],
+            "email": doc["email"],
+            "role": doc["role"],
+            "phone": doc.get("phone"),
+        }
+        token = AuthService._generate_token(user["id"])
+        return {"user": user, "token": token}, None
+
+    @staticmethod
+    def get_user_by_id(user_id: str) -> Optional[dict]:
+        try:
+            doc = users_collection.find_one({"_id": ObjectId(user_id)})
+        except Exception:
+            return None
+        if not doc:
+            return None
+        return {
+            "id": str(doc["_id"]),
+            "name": doc["name"],
+            "email": doc["email"],
+            "role": doc["role"],
+            "phone": doc.get("phone"),
+        }
