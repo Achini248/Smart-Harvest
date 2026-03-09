@@ -1,35 +1,42 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from models.user_model import db
+
+from config import Config
 from routes.auth_routes import auth_bp
+from routes.crop_routes import crop_bp
+from routes.market_routes import market_bp
+from routes.chat_routes import chat_bp
+from routes.weather_routes import weather_bp
+from utils.logger import logger
 
-# Create the Flask application instance
-app = Flask(__name__)
+def create_app() -> Flask:
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-# Enable CORS to allow the frontend application to communicate with the backend
-CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# Database configuration (SQLite database)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///smart_harvest.db'
+    # Blueprints
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(crop_bp)
+    app.register_blueprint(market_bp)
+    app.register_blueprint(chat_bp)
+    app.register_blueprint(weather_bp)
 
-# Secret key used to sign and verify JWT tokens
-app.config['JWT_SECRET_KEY'] = 'smart-harvest-key-2026'
+    @app.get("/health")
+    def health():
+        return jsonify({"status": "ok"}), 200
 
-# Initialize SQLAlchemy with the Flask app
-db.init_app(app)
+    @app.errorhandler(404)
+    def not_found(_):
+        return jsonify({"success": False, "message": "Not found"}), 404
 
-# Initialize JWT authentication
-jwt = JWTManager(app)
+    @app.errorhandler(500)
+    def server_error(e):
+        logger.error(f"Internal server error: {e}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
 
-# Create database tables if they do not already exist
-with app.app_context():
-    db.create_all()
+    return app
 
-# Register authentication routes with the prefix /api/auth
-# Example: /api/auth/login , /api/auth/register
-app.register_blueprint(auth_bp, url_prefix='/api/auth')
-
-# Run the Flask development server
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app = create_app()
+    app.run(host="0.0.0.0", port=5000, debug=True)
