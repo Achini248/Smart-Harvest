@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "75661978047",
+    "project_id": "smart-harvest-f27d4",
+    "storage_bucket": "smart-harvest-f27d4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75661978047:android:2351804904e3bcc9c1590a",
+        "android_client_info": {
+          "package_name": "com.example.smart_harvest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOl0lumNZ9a7SKiDUFUuDhDW6ca7UFcYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75661978047:android:6e6dd5190817f703c1590a",
+        "android_client_info": {
+          "package_name": "com.example.smart_harvest_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOl0lumNZ9a7SKiDUFUuDhDW6ca7UFcYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
