@@ -1,40 +1,35 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
   late final StreamSubscription<User?> _authSubscription;
 
   AuthBloc() : super(const AuthInitial()) {
+
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
     on<LogoutEvent>(_onLogout);
+    on<GoogleLoginEvent>(_onGoogleLogin);
+    on<AuthStateChanged>(_onAuthStateChanged);
 
-    // 🔥 Listen to Firebase auth state directly
     _authSubscription =
         _firebaseAuth.authStateChanges().listen((user) {
-          if (user != null) {
-            emit(
-              Authenticated(
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName,
-              ),
-            );
-          } else {
-            emit(const Unauthenticated());
-          }
+          add(AuthStateChanged(user));
         });
   }
 
   // ---------------- LOGIN ----------------
   Future<void> _onLogin(
-      LoginEvent event,
-      Emitter<AuthState> emit,
-      ) async {
+    LoginEvent event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(const AuthLoading());
 
     try {
@@ -42,7 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
       );
-      // No manual emit — stream handles it
+      // authStateChanges stream will update state
     } on FirebaseAuthException catch (e) {
       emit(AuthError(message: e.message ?? "Login error"));
     } catch (e) {
@@ -52,9 +47,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   // ---------------- REGISTER ----------------
   Future<void> _onRegister(
-      RegisterEvent event,
-      Emitter<AuthState> emit,
-      ) async {
+    RegisterEvent event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(const AuthLoading());
 
     try {
@@ -62,7 +57,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
       );
-      // Stream handles state
+      // authStateChanges stream will update state
     } on FirebaseAuthException catch (e) {
       emit(AuthError(message: e.message ?? "Registration error"));
     } catch (e) {
@@ -70,15 +65,69 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  // ---------------- LOGOUT ----------------
-  Future<void> _onLogout(
-      LogoutEvent event,
-      Emitter<AuthState> emit,
-      ) async {
-    await _firebaseAuth.signOut();
-    // Stream handles state
+  // ---------------- GOOGLE LOGIN ----------------
+  Future<void> _onGoogleLogin(
+    GoogleLoginEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    try {
+      final GoogleSignInAccount? googleUser =
+          await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        emit(const AuthError(message: "Google sign in cancelled"));
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _firebaseAuth.signInWithCredential(credential);
+
+      // Firebase auth stream will emit Authenticated state
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(message: e.message ?? "Google login error"));
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
   }
 
+  // ---------------- LOGOUT ----------------
+  Future<void> _onLogout(
+    LogoutEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    await _googleSignIn.signOut(); // logout from google
+    await _firebaseAuth.signOut();
+  }
+
+  Future<void> _onAuthStateChanged(
+      AuthStateChanged event,
+      Emitter<AuthState> emit,
+      ) async {
+    final user = event.user;
+
+    if (user != null) {
+      emit(
+        Authenticated(
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+        ),
+      );
+    } else {
+      emit(const Unauthenticated());
+    }
+  }
+
+  // ---------------- CLOSE ----------------
   @override
   Future<void> close() {
     _authSubscription.cancel();

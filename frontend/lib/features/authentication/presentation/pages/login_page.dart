@@ -210,6 +210,30 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 24),
 
+                        const SizedBox(height: 16),
+
+                        // Google Sign-In Button
+                        BlocBuilder<AuthBloc, AuthState>(
+                          builder: (context, state) {
+                            return CustomButton(
+                              text: 'Sign in with Google',
+                              onPressed: state is AuthLoading
+                                  ? null
+                                  : () {
+                                      context.read<AuthBloc>().add(GoogleLoginEvent());
+                                    },
+                              isLoading: state is AuthLoading,
+                              backgroundColor: AppColors.white,
+                              textColor: AppColors.black,
+                              icon: Image.asset(
+                                'assets/icons/google_icon.png', // Make sure you add a Google icon SVG
+                                height: 24,
+                                width: 24,
+                              ),
+                            );
+                          },
+                        ),
+
                         // Sign Up
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,

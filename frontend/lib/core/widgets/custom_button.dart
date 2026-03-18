@@ -1,4 +1,3 @@
-//update custom_button.dart
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../theme/text_styles.dart';
@@ -11,6 +10,7 @@ class CustomButton extends StatelessWidget {
   final Color? textColor;
   final double? width;
   final double height;
+  final Widget? icon; // <-- Added icon support
 
   const CustomButton({
     super.key,
@@ -21,6 +21,7 @@ class CustomButton extends StatelessWidget {
     this.textColor,
     this.width,
     this.height = 56,
+    this.icon,
   });
 
   @override
@@ -46,11 +47,21 @@ class CustomButton extends StatelessWidget {
                   strokeWidth: 2,
                 ),
               )
-            : Text(
-                text,
-                style: AppTextStyles.buttonText.copyWith(
-                  color: textColor ?? AppColors.white,
-                ),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    icon!,
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    text,
+                    style: AppTextStyles.buttonText.copyWith(
+                      color: textColor ?? AppColors.white,
+                    ),
+                  ),
+                ],
               ),
       ),
     );
