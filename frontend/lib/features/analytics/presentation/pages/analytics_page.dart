@@ -1,7 +1,4 @@
 // lib/features/analytics/presentation/pages/analytics_page.dart
-// MODIFIED: uses DI-injected AnalyticsBloc (real API) instead of inline instances.
-// All UI code preserved. Removed Random() simulation.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -154,6 +151,8 @@ class _AnalyticsView extends StatelessWidget {
                 ],
 
                 // ── Raw breakdown ─────────────────────────────────────
+                // FIX: cascade (..) replaced with immediately-invoked
+                // function to correctly return a List<Widget>
                 if (analytics.cropDistribution.isNotEmpty) ...[
                   Align(
                     alignment: Alignment.centerLeft,
@@ -167,15 +166,21 @@ class _AnalyticsView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  ...analytics.cropDistribution.entries
-                      .toList()
-                    ..sort((a, b) => b.value.compareTo(a.value))
-                    ..take(10).map((e) => _CropRow(
-                          name: e.key,
-                          quantity: e.value,
-                          maxQty: analytics.cropDistribution.values
-                              .reduce((a, b) => a > b ? a : b),
-                        )),
+                  ...() {
+                    final entries =
+                        analytics.cropDistribution.entries.toList()
+                          ..sort((a, b) => b.value.compareTo(a.value));
+                    final maxQty = analytics.cropDistribution.values
+                        .reduce((a, b) => a > b ? a : b);
+                    return entries
+                        .take(10)
+                        .map((e) => _CropRow(
+                              name: e.key,
+                              quantity: e.value,
+                              maxQty: maxQty,
+                            ))
+                        .toList();
+                  }(),
                 ],
               ],
             ),
