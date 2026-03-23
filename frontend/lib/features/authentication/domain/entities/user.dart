@@ -7,7 +7,7 @@ class UserEntity extends Equatable {
   final String? phoneNo;
   final String? location;
   final String? profilePhotoUrl;
-  final String role; // 'farmer', 'buyer', 'officer'
+  final String role; 
 
   const UserEntity({
     required this.id,
