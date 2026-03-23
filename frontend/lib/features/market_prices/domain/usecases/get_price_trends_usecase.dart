@@ -1,18 +1,10 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/errors/failures.dart';
+import '../entities/price.dart';
 import '../repositories/price_repository.dart';
 
-class GetPriceTrendsUseCase {
+class GetPriceHistoryUseCase {
   final PriceRepository repository;
-  const GetPriceTrendsUseCase(this.repository);
+  const GetPriceHistoryUseCase(this.repository);
 
-  Future<Either<Failure, Map<DateTime, double>>> call(String productName) async {
-    try {
-      final result = await repository.getPriceTrends(productName);
-      return Right(result);
-    } catch (e) {
-      // මෙතන message එකක් ඇතුළත් කළා
-      return const Left(ServerFailure(message: 'Server error occurred')); 
-    }
-  }
+  Future<List<PriceHistoryPoint>> call(String cropName, {int days = 30}) =>
+      repository.getPriceHistory(cropName, days: days);
 }

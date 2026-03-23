@@ -19,7 +19,7 @@ class UserEntity extends Equatable {
     this.role = 'farmer',
   });
 
-  
+  // ProfileSettingsPage එකේ එන error එක නැති කරන්න මේ getter එක අවශ්‍යයි
   String get displayName => name ?? email.split('@')[0];
 
   @override

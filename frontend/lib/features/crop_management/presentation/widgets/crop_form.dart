@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/crop.dart';
 
 class CropForm extends StatefulWidget {
-  final Crop? initialCrop;        
+  final Crop? initialCrop;        // null = add mode, non-null = edit mode
   final String ownerId;
   final void Function(Crop crop) onSubmit;
   final bool isLoading;

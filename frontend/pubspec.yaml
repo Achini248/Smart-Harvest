@@ -1,5 +1,5 @@
 name: smart_harvest_app
-description: A Flutter mobile app for farmers, buyers, and agriculture officers
+description: Smart Harvest — Agricultural platform for farmers, buyers, and agriculture officers in Sri Lanka
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,51 +10,48 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # State Management
-  flutter_bloc: ^9.1.1
+  # ── State Management ─────────────────────────────────────────────────────
+  flutter_bloc: ^8.1.6
   equatable: ^2.0.5
   dartz: ^0.10.1
-  get_it: ^9.2.1
+  get_it: ^7.6.4
 
-  # Firebase (ALIGNED VERSIONS)
-  firebase_core: ^4.5.0
-  firebase_auth: ^6.2.0
-  cloud_firestore: ^6.1.3
-  firebase_messaging: ^16.1.2
+  # ── Firebase ─────────────────────────────────────────────────────────────
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.9
+  cloud_firestore: ^4.15.9
+  firebase_messaging: ^14.7.19
+  firebase_storage: ^11.6.10
 
-  # Network
-  http: ^1.1.0
-  dio: ^5.4.0
+  # ── Networking ────────────────────────────────────────────────────────────
+  http: ^1.2.1
+  dio: ^5.4.3+1
+  connectivity_plus: ^5.0.2
 
-  # Local Storage
-  shared_preferences: ^2.2.2
+  # ── UI ────────────────────────────────────────────────────────────────────
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10+1
 
-  # UI
-  cupertino_icons: ^1.0.2
-  google_fonts: ^8.0.2
-  flutter_svg: ^2.0.9
-
-  # Image Picker
-  image_picker: ^1.0.7
-
-  # Google Sign-In
-  google_sign_in: ^7.2.0
-
-  # Utilities
+  # ── Storage & Utilities ───────────────────────────────────────────────────
+  shared_preferences: ^2.2.3
   intl: ^0.20.2
-  connectivity_plus: ^7.0.0
+  image_picker: ^1.0.7
+  google_sign_in: ^6.2.1
 
-  # Localization
+  # ── Localizations ─────────────────────────────────────────────────────────
   flutter_localizations:
     sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
-  bloc_test: ^10.0.0
-  mocktail: ^1.0.1
-  build_runner: ^2.4.7  # optional for code generation
+  flutter_lints: ^3.0.2
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.3
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/

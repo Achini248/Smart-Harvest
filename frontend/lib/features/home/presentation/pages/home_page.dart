@@ -1,6 +1,8 @@
+// lib/features/home/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/text_styles.dart';
@@ -8,468 +10,486 @@ import '../../../../config/routes/route_names.dart';
 import '../../../authentication/presentation/bloc/auth_bloc.dart';
 import '../../../authentication/presentation/bloc/auth_event.dart';
 import '../../../authentication/presentation/bloc/auth_state.dart';
+import '../bloc/home_bloc.dart';
+import '../bloc/home_event.dart';
+import '../bloc/home_state.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/drawer_menu.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  String? _preferredName;
 
-  final List<Widget> _pages = const [
-    HomeTabView(),
-    MarketplaceTabView(),
-    CropsTabView(),
-    ProfileTabView(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferredName();
+  }
+
+  Future<void> _loadPreferredName() async {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is Authenticated) {
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getString('preferred_name_${auth.uid}');
+      if (mounted) setState(() => _preferredName = stored);
+      if (stored == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _showNameDialog(auth.uid));
+      }
+    }
+  }
+
+  Future<void> _showNameDialog(String uid) async {
+    final ctrl = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Welcome to Smart Harvest! 🌿'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('How would you like us to address you?',
+              style: TextStyle(color: Colors.black54)),
+          const SizedBox(height: 16),
+          TextField(
+            controller: ctrl,
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              hintText: 'e.g. Kasun, Nimal...',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+              ),
+              prefixIcon: const Icon(Icons.person_outline),
+            ),
+          ),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, ''), child: const Text('Skip')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryGreen,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+            onPressed: () => Navigator.pop(context, ctrl.text.trim()),
+            child: const Text('Save', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result.isNotEmpty) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('preferred_name_$uid', result);
+      if (mounted) setState(() => _preferredName = result);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is Unauthenticated) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            RouteNames.login,
-            (route) => false,
-          );
+          Navigator.pushNamedAndRemoveUntil(context, RouteNames.authSelection, (_) => false);
+        } else if (state is Authenticated) {
+          _loadPreferredName();
         }
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            AppStrings.appName,
-            style: AppTextStyles.heading3,
-          ),
+          title: Text(AppStrings.appName, style: AppTextStyles.heading3),
           actions: [
+            // Notifications bell — routes to NotificationsPage
             IconButton(
               icon: const Icon(Icons.notifications_outlined),
-              onPressed: () {
-                Navigator.pushNamed(context, RouteNames.notifications);
-              },
+              onPressed: () => Navigator.pushNamed(context, RouteNames.notifications),
+              tooltip: 'Notifications',
             ),
           ],
         ),
         drawer: const DrawerMenu(),
-        body: _pages[_selectedIndex],
-        bottomNavigationBar: BottomNavBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ),
-      ),
-    );
-  }
-}
-
-// =======================
-// Home Tab
-// =======================
-
-class HomeTabView extends StatelessWidget {
-  const HomeTabView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: IndexedStack(
+          index: _selectedIndex,
           children: [
-            // Welcome Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    AppColors.primaryGreen,
-                    AppColors.primaryGreenLight,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome Back!',
-                          style: AppTextStyles.heading3.copyWith(
-                            color: AppColors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          AppStrings.appSlogan,
-                          style: AppTextStyles.bodyText.copyWith(
-                            color: AppColors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(
-                    Icons.eco,
-                    size: 60,
-                    color: AppColors.white,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Quick Actions
-            Text(
-              'Quick Actions',
-              style: AppTextStyles.heading3,
-            ),
-            const SizedBox(height: 16),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              children: [
-                _buildQuickActionCard(
-                  context,
-                  'My Crops',
-                  Icons.agriculture,
-                  () {
-                    Navigator.pushNamed(context, RouteNames.myCrops);
-                  },
-                ),
-                _buildQuickActionCard(
-                  context,
-                  'Market Prices',
-                  Icons.trending_up,
-                  () {
-                    Navigator.pushNamed(
-                        context, RouteNames.dailyMarketPrices);
-                  },
-                ),
-                _buildQuickActionCard(
-                  context,
-                  'Weather',
-                  Icons.wb_sunny,
-                  () {
-                    Navigator.pushNamed(context, RouteNames.weatherOverview);
-                  },
-                ),
-                _buildQuickActionCard(
-                  context,
-                  'Messages',
-                  Icons.message,
-                  () {
-                    Navigator.pushNamed(
-                        context, RouteNames.messagesList);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Recent Activity
-            Text(
-              'Recent Activity',
-              style: AppTextStyles.heading3,
-            ),
-            const SizedBox(height: 16),
-            _buildActivityItem('New order received', '2 hours ago'),
-            _buildActivityItem(
-                'Price update for tomatoes', '5 hours ago'),
-            _buildActivityItem(
-                'Weather alert for your area', '1 day ago'),
+            _HomeTab(preferredName: _preferredName),
+            const _MarketplaceTab(),
+            const _CropsTab(),
+            const ProfilePage(),
           ],
         ),
+        bottomNavigationBar: BottomNavBar(
+          currentIndex: _selectedIndex,
+          onTap: (i) => setState(() => _selectedIndex = i),
+        ),
       ),
     );
   }
+}
 
-  Widget _buildQuickActionCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 48, color: AppColors.primaryGreen),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: AppTextStyles.bodyTextBold,
-                textAlign: TextAlign.center,
-              ),
+// ── Home Tab ──────────────────────────────────────────────────────────────────
+class _HomeTab extends StatelessWidget {
+  final String? preferredName;
+  const _HomeTab({this.preferredName});
+  @override
+  Widget build(BuildContext context) => BlocProvider(
+        create: (_) => HomeBloc()..add(const LoadHomeDataEvent()),
+        child: _HomeTabView(preferredName: preferredName),
+      );
+}
+
+class _HomeTabView extends StatelessWidget {
+  final String? preferredName;
+  const _HomeTabView({this.preferredName});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) => RefreshIndicator(
+        color: AppColors.primaryGreen,
+        onRefresh: () async {
+          context.read<HomeBloc>().add(const RefreshHomeDataEvent());
+          await Future.delayed(const Duration(milliseconds: 800));
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const SizedBox(height: 16),
+            _GreetingCard(preferredName: preferredName),
+            const SizedBox(height: 20),
+            if (state is HomeLoaded && state.weather != null) ...[
+              _WeatherCard(weather: state.weather!),
+              const SizedBox(height: 20),
+            ] else if (state is HomeLoading) ...[
+              _Skeleton(height: 72, radius: 16),
+              const SizedBox(height: 20),
             ],
-          ),
+            Text('Quick Actions', style: AppTextStyles.heading3),
+            const SizedBox(height: 12),
+            _QuickActions(),
+            const SizedBox(height: 20),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text('Live Market Prices', style: AppTextStyles.heading3),
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, RouteNames.dailyMarketPrices),
+                child: const Text('See All', style: TextStyle(color: AppColors.primaryGreen)),
+              ),
+            ]),
+            const SizedBox(height: 8),
+            _PricesSection(state: state),
+            const SizedBox(height: 20),
+            Text('Agriculture News', style: AppTextStyles.heading3),
+            const SizedBox(height: 12),
+            _NewsSection(state: state),
+          ]),
         ),
       ),
     );
   }
-
-  Widget _buildActivityItem(String title, String time) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: AppColors.primaryGreenLight,
-          child:
-              Icon(Icons.notifications, color: AppColors.primaryGreen),
-        ),
-        title: Text(title, style: AppTextStyles.bodyText),
-        subtitle: Text(time, style: AppTextStyles.caption),
-      ),
-    );
-  }
 }
 
-// =======================
-// Marketplace Tab
-// =======================
-
-class MarketplaceTabView extends StatelessWidget {
-  const MarketplaceTabView({super.key});
-
+class _Skeleton extends StatelessWidget {
+  final double height;
+  final double radius;
+  const _Skeleton({required this.height, this.radius = 8});
   @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Marketplace - Coming Soon'),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+        height: height,
+        decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(radius)));
 }
 
-// =======================
-// Crops Tab
-// =======================
-
-class CropsTabView extends StatelessWidget {
-  const CropsTabView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Crops Management - Coming Soon'),
-    );
-  }
-}
-
-// =======================
-// Profile Tab
-// =======================
-
-class ProfileTabView extends StatelessWidget {
-  const ProfileTabView({super.key});
-
+// ── Greeting Card ─────────────────────────────────────────────────────────────
+class _GreetingCard extends StatelessWidget {
+  final String? preferredName;
+  const _GreetingCard({this.preferredName});
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        if (state is Authenticated) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 24),
-                  const CircleAvatar(
-                    radius: 60,
-                    backgroundColor: AppColors.primaryGreenLight,
-                    child: Icon(
-                      Icons.person,
-                      size: 60,
-                      color: AppColors.primaryGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    state.displayName ?? 'User',
-                    style: AppTextStyles.heading2,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.email ?? '',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  _buildProfileOption(
-                    context,
-                    'Profile Settings',
-                    Icons.person_outline,
-                    () {
-                      Navigator.pushNamed(
-                          context, RouteNames.profileSettings);
-                    },
-                  ),
-                  _buildProfileOption(
-                    context,
-                    'Account Settings',
-                    Icons.settings_outlined,
-                    () {
-                      Navigator.pushNamed(
-                          context, RouteNames.accountSettings);
-                    },
-                  ),
-                  _buildProfileOption(
-                    context,
-                    'Help & Support',
-                    Icons.help_outline,
-                    () {
-                      Navigator.pushNamed(
-                          context, RouteNames.helpSupport);
-                    },
-                  ),
-                  _buildProfileOption(
-                    context,
-                    'Logout',
-                    Icons.logout,
-                    () {
-                      _showLogoutDialog(context);
-                    },
-                    isDestructive: true,
-                  ),
-                ],
-              ),
+        final isGuest = state is! Authenticated;
+        String name = 'Welcome';
+        if (!isGuest) {
+          name = preferredName ??
+              (state as Authenticated).displayName?.split(' ').first ?? 'Farmer';
+        }
+        final h = DateTime.now().hour;
+        final greeting = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primaryGreen, AppColors.primaryGreenLight],
+              begin: Alignment.topLeft, end: Alignment.bottomRight,
             ),
-          );
-        }
-
-        if (state is AuthLoading || state is AuthInitial) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (state is AuthError) {
-          return Center(
-            child: Text(
-              state.message,
-              style: const TextStyle(color: Colors.red),
-            ),
-          );
-        }
-
-        if (state is Unauthenticated) {
-          return const Center(child: Text('Not logged in'));
-        }
-
-        return const SizedBox.shrink();
-      },
-    );
-  }
-
-  Widget _buildProfileOption(
-    BuildContext context,
-    String title,
-    IconData icon,
-    VoidCallback onTap, {
-    bool isDestructive = false,
-  }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color: isDestructive ? AppColors.error : AppColors.primaryGreen,
-        ),
-        title: Text(
-          title,
-          style: AppTextStyles.bodyTextBold.copyWith(
-            color: isDestructive
-                ? AppColors.error
-                : AppColors.textPrimary,
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            'Are You Sure Want To\nLog Out',
-            style: AppTextStyles.heading3,
-            textAlign: TextAlign.center,
-          ),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: AppColors.lightGrey,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        'Cancel',
-                        style: AppTextStyles.bodyTextBold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                      context.read<AuthBloc>().add(LogoutEvent());
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreen,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        'Log Out',
-                        style: AppTextStyles.bodyTextBold.copyWith(
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
+          child: Row(children: [
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('$greeting,', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+              const SizedBox(height: 4),
+              Text(isGuest ? 'Hello, Welcome' : 'Hello, $name',
+                  style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6),
+              Text(DateFormat('EEEE, d MMMM yyyy').format(DateTime.now()),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              if (isGuest) ...[
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, RouteNames.login),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withOpacity(0.5))),
+                    child: const Text('Sign In →',
+                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                   ),
                 ),
               ],
-            ),
-          ],
+            ])),
+            const Icon(Icons.eco, size: 56, color: Colors.white),
+          ]),
         );
       },
     );
   }
+}
+
+// ── Weather Card ──────────────────────────────────────────────────────────────
+class _WeatherCard extends StatelessWidget {
+  final WeatherSummary weather;
+  const _WeatherCard({required this.weather});
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, RouteNames.weatherOverview),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.blue.shade100),
+        ),
+        child: Row(children: [
+          Icon(_icon(weather.condition), color: Colors.blue.shade600, size: 36),
+          const SizedBox(width: 14),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Text(weather.condition,
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+              const SizedBox(width: 8),
+              Text('${weather.temperature.toStringAsFixed(0)}°C',
+                  style: TextStyle(color: Colors.blue.shade700, fontWeight: FontWeight.w600)),
+            ]),
+            const SizedBox(height: 4),
+            Text(weather.farmingAdvice,
+                style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                maxLines: 2, overflow: TextOverflow.ellipsis),
+          ])),
+          Icon(Icons.chevron_right, color: Colors.blue.shade400),
+        ]),
+      ),
+    );
+  }
+  IconData _icon(String c) {
+    final l = c.toLowerCase();
+    if (l.contains('rain') || l.contains('drizzle')) return Icons.grain;
+    if (l.contains('storm') || l.contains('thunder')) return Icons.thunderstorm;
+    if (l.contains('cloud')) return Icons.cloud;
+    if (l.contains('haze') || l.contains('mist') || l.contains('fog')) return Icons.blur_on;
+    return Icons.wb_sunny;
+  }
+}
+
+// ── Quick Actions ─────────────────────────────────────────────────────────────
+class _QuickActions extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      _QA('My Crops', Icons.agriculture, RouteNames.myCrops),
+      _QA('Prices', Icons.trending_up, RouteNames.dailyMarketPrices),
+      _QA('Weather', Icons.wb_sunny, RouteNames.weatherOverview),
+      _QA('Messages', Icons.message, RouteNames.messagesList),
+    ];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: items.map((a) => GestureDetector(
+        onTap: () => Navigator.pushNamed(context, a.route),
+        child: SizedBox(width: 72, child: Column(children: [
+          Container(width: 54, height: 54,
+              decoration: BoxDecoration(color: AppColors.primaryGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14)),
+              child: Icon(a.icon, color: AppColors.primaryGreen, size: 26)),
+          const SizedBox(height: 6),
+          Text(a.label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center, maxLines: 2),
+        ])),
+      )).toList(),
+    );
+  }
+}
+class _QA { final String label; final IconData icon; final String route;
+  const _QA(this.label, this.icon, this.route); }
+
+// ── Prices Section ────────────────────────────────────────────────────────────
+class _PricesSection extends StatelessWidget {
+  final HomeState state;
+  const _PricesSection({required this.state});
+  @override
+  Widget build(BuildContext context) {
+    if (state is HomeLoading) {
+      return Column(children: List.generate(3, (_) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Container(height: 64, decoration: BoxDecoration(
+                color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12))))));
+    }
+    if (state is HomeLoaded) {
+      final prices = (state as HomeLoaded).topPrices;
+      if (prices.isEmpty) return _empty('No price data available today.');
+      return Column(children: prices.map((p) => _PriceRow(p)).toList());
+    }
+    return _empty('Unable to load prices.');
+  }
+  Widget _empty(String msg) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+        child: Text(msg, style: const TextStyle(color: AppColors.textSecondary)));
+}
+
+class _PriceRow extends StatelessWidget {
+  final TopPriceItem p;
+  const _PriceRow(this.p);
+  @override
+  Widget build(BuildContext context) {
+    final isUp = p.priceChange >= 0;
+    final color = isUp ? AppColors.success : AppColors.error;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2))]),
+      child: Row(children: [
+        Container(width: 10, height: 10, decoration: BoxDecoration(shape: BoxShape.circle,
+            color: p.isSurplus ? AppColors.success : p.isShortage ? AppColors.error : AppColors.warning)),
+        const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(p.cropName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+          Text(p.isSurplus ? 'Surplus' : p.isShortage ? 'Shortage' : 'Normal',
+              style: TextStyle(fontSize: 11, color: p.isSurplus ? AppColors.success : p.isShortage ? AppColors.error : AppColors.textSecondary)),
+        ])),
+        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Text('LKR ${p.avgPrice.toStringAsFixed(0)}/kg',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+          if (p.predictedPrice != null)
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(isUp ? Icons.arrow_upward : Icons.arrow_downward, size: 12, color: color),
+              Text('${p.priceChangePct.abs().toStringAsFixed(1)}%', style: TextStyle(fontSize: 11, color: color)),
+            ]),
+        ]),
+      ]),
+    );
+  }
+}
+
+// ── News Section ──────────────────────────────────────────────────────────────
+class _NewsSection extends StatelessWidget {
+  final HomeState state;
+  const _NewsSection({required this.state});
+  @override
+  Widget build(BuildContext context) {
+    if (state is HomeLoading) {
+      return Column(children: List.generate(2, (_) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Container(height: 140, decoration: BoxDecoration(
+                color: Colors.grey.shade200, borderRadius: BorderRadius.circular(16))))));
+    }
+    if (state is HomeLoaded) {
+      final news = (state as HomeLoaded).news;
+      if (news.isEmpty) return _empty('No news available right now.');
+      return Column(children: news.map((n) => _NewsCard(n)).toList());
+    }
+    return _empty('Unable to load news.');
+  }
+  Widget _empty(String msg) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+        child: Text(msg, style: const TextStyle(color: AppColors.textSecondary)));
+}
+
+class _NewsCard extends StatelessWidget {
+  final NewsItem item;
+  const _NewsCard(this.item);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 3))]),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (item.imageUrl.isNotEmpty)
+          ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: Image.network(item.imageUrl, height: 130, width: double.infinity, fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _banner()))
+        else _banner(),
+        Padding(padding: const EdgeInsets.all(14), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(item.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              maxLines: 2, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 6),
+          Text(item.description, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              maxLines: 3, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 8),
+          Row(children: [
+            const Icon(Icons.source, size: 12, color: AppColors.textSecondary),
+            const SizedBox(width: 4),
+            Expanded(child: Text(item.source, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                overflow: TextOverflow.ellipsis)),
+            Text(_fmt(item.publishedAt), style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          ]),
+        ])),
+      ]),
+    );
+  }
+  Widget _banner() {
+    final bg = switch (item.category) {
+      'Supply Alert' => const Color(0xFFFFF3CD),
+      'Market Update' => const Color(0xFFE3F2FD),
+      _ => const Color(0xFFE8F5E9),
+    };
+    return Container(height: 44,
+        decoration: BoxDecoration(color: bg, borderRadius: const BorderRadius.vertical(top: Radius.circular(16))),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(children: [
+          const Icon(Icons.article_outlined, size: 16, color: AppColors.primaryGreen),
+          const SizedBox(width: 8),
+          Text(item.category, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppColors.primaryGreen)),
+        ]));
+  }
+  String _fmt(String raw) {
+    try { return DateFormat('d MMM').format(DateTime.parse(raw)); }
+    catch (_) { return raw.length > 10 ? raw.substring(0, 10) : raw; }
+  }
+}
+
+// ── Tab Bodies ────────────────────────────────────────────────────────────────
+class _MarketplaceTab extends StatefulWidget {
+  const _MarketplaceTab();
+  @override State<_MarketplaceTab> createState() => _MarketplaceTabState();
+}
+class _MarketplaceTabState extends State<_MarketplaceTab> {
+  @override void initState() { super.initState(); WidgetsBinding.instance.addPostFrameCallback((_) => Navigator.pushNamed(context, RouteNames.marketplaceHome)); }
+  @override Widget build(BuildContext context) => const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen));
+}
+
+class _CropsTab extends StatefulWidget {
+  const _CropsTab();
+  @override State<_CropsTab> createState() => _CropsTabState();
+}
+class _CropsTabState extends State<_CropsTab> {
+  @override void initState() { super.initState(); WidgetsBinding.instance.addPostFrameCallback((_) => Navigator.pushNamed(context, RouteNames.myCrops)); }
+  @override Widget build(BuildContext context) => const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen));
 }

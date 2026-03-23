@@ -1,71 +1,59 @@
 // lib/features/market_prices/data/datasources/price_remote_datasource.dart
-import 'dart:math';
-
+import '../../../../core/network/api_client.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../models/price_model.dart';
+import '../../domain/entities/price.dart';
 
 abstract class PriceRemoteDataSource {
-  /// Get mock daily prices for today.
-  Future<List<PriceModel>> getDailyPrices();
-
-  /// Get mock price history for the last few days (for trend).
-  Future<Map<DateTime, double>> getPriceTrends(String productName);
+  Future<List<PriceModel>>       getDailyPrices({String? district});
+  Future<List<PriceHistoryModel>> getPriceHistory(String cropName, {int days = 30});
+  Future<SupplyAnalyticsModel>   getSupplyStatus();
+  Future<ForecastModel>          getForecast(String cropName);
 }
 
 class PriceRemoteDataSourceImpl implements PriceRemoteDataSource {
-  final Random _random = Random();
+  final ApiClient _api;
 
-  // Simple in‑memory list of products
-  final List<String> _products = const [
-    'Tomato',
-    'Potato',
-    'Beans',
-    'Carrot',
-    'Cabbage',
-    'Leeks',
-  ];
+  PriceRemoteDataSourceImpl({ApiClient? apiClient})
+      : _api = apiClient ?? ApiClient.instance;
 
   @override
-  Future<List<PriceModel>> getDailyPrices() async {
-    await Future.delayed(const Duration(milliseconds: 800)); // simulate latency
-
-    final today = DateTime.now();
-    final List<PriceModel> list = [];
-
-    for (int i = 0; i < _products.length; i++) {
-      final basePrice = 150 + _random.nextInt(300); // 150 – 450
-      final change = _random.nextInt(15) - 7; // -7% .. +7%
-
-      list.add(
-        PriceModel(
-          id: 'price_${today.toIso8601String()}_$i',
-          productName: _products[i],
-          pricePerUnit: basePrice.toDouble(),
-          unit: 'kg',
-          changePercent: change.toDouble(),
-          date: DateTime(today.year, today.month, today.day),
-        ),
-      );
-    }
-
-    return list;
+  Future<List<PriceModel>> getDailyPrices({String? district}) async {
+    final params = <String, String>{
+      'per_page': '100',
+      if (district != null && district != 'All') 'district': district,
+    };
+    final data = await _api.get(ApiConstants.todayPrices, queryParams: params);
+    // Backend returns paginated: { items: [...], total: ... }
+    final items = (data is Map && data.containsKey('items'))
+        ? data['items'] as List<dynamic>
+        : data as List<dynamic>;
+    return items
+        .map((e) => PriceModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   @override
-  Future<Map<DateTime, double>> getPriceTrends(String productName) async {
-    await Future.delayed(const Duration(milliseconds: 600));
+  Future<List<PriceHistoryModel>> getPriceHistory(
+      String cropName, {int days = 30}) async {
+    final data = await _api.get(
+      ApiConstants.priceHistory(cropName),
+      queryParams: {'days': days.toString()},
+    );
+    return (data as List<dynamic>)
+        .map((e) => PriceHistoryModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 
-    final today = DateTime.now();
-    final Map<DateTime, double> data = {};
-    double base = 200.0 + _random.nextInt(200); // start
+  @override
+  Future<SupplyAnalyticsModel> getSupplyStatus() async {
+    final data = await _api.get(ApiConstants.supplyStatus);
+    return SupplyAnalyticsModel.fromJson(data as Map<String, dynamic>);
+  }
 
-
-    for (int i = 5; i >= 0; i--) {
-      final day = DateTime(today.year, today.month, today.day - i);
-      final delta = _random.nextInt(30) - 15; // change -15..+15
-      base = (base + delta).clamp(120, 450);
-      data[day] = base;
-    }
-
-    return data;
+  @override
+  Future<ForecastModel> getForecast(String cropName) async {
+    final data = await _api.get(ApiConstants.forecast(cropName));
+    return ForecastModel.fromJson(data as Map<String, dynamic>);
   }
 }

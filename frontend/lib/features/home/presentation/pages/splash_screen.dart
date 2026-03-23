@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
           });
         } else if (state is Unauthenticated) {
           Future.delayed(const Duration(seconds: 2), () {
-            Navigator.pushReplacementNamed(context, RouteNames.onboarding);
+            Navigator.pushReplacementNamed(context, RouteNames.authSelection); // MODIFIED: was onboarding
           });
         }
       },

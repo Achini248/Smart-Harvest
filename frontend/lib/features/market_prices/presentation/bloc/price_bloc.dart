@@ -1,85 +1,123 @@
+// lib/features/market_prices/presentation/bloc/price_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/errors/failures.dart';
-import '../../domain/entities/price.dart'; 
+import '../../domain/entities/price.dart';
 import '../../domain/usecases/get_daily_prices_usecase.dart';
 import '../../domain/usecases/get_price_trends_usecase.dart';
+import '../../domain/usecases/get_supply_status_usecase.dart';
+import '../../domain/usecases/get_forecast_usecase.dart';
 import 'price_event.dart';
 import 'price_state.dart';
 
 class PriceBloc extends Bloc<PriceEvent, PriceState> {
-  final GetDailyPricesUseCase getDailyPrices;
-  final GetPriceTrendsUseCase getPriceTrends;
+  final GetDailyPricesUseCase   getDailyPrices;
+  final GetPriceHistoryUseCase  getPriceHistory;
+  final GetSupplyStatusUseCase  getSupplyStatus;
+  final GetForecastUseCase      getForecast;
 
   PriceBloc({
     required this.getDailyPrices,
-    required this.getPriceTrends,
+    required this.getPriceHistory,
+    required this.getSupplyStatus,
+    required this.getForecast,
   }) : super(PriceState.initial()) {
-    on<LoadDailyPricesEvent>(_onLoadDailyPrices);
-    on<LoadPriceTrendsEvent>(_onLoadTrends);
+    on<LoadDailyPricesEvent>(_onLoadPrices);
+    on<LoadSupplyStatusEvent>(_onLoadSupply);
+    on<LoadForecastEvent>(_onLoadForecast);
     on<SearchPricesEvent>(_onSearch);
+    on<FilterByDistrictEvent>(_onFilterDistrict);
+    on<RefreshAllPricesEvent>(_onRefresh);
   }
 
-  // UseCase එකෙන් කෙලින්ම List<PriceEntity> එකක් එන නිසා try-catch පාවිච්චි කරයි
-  Future<void> _onLoadDailyPrices(
+  // ── Load today's prices ────────────────────────────────────────────────────
+  Future<void> _onLoadPrices(
     LoadDailyPricesEvent event,
     Emitter<PriceState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, errorMessage: null));
-    
+    emit(state.copyWith(isLoadingPrices: true, clearError: true));
     try {
-      final List<PriceEntity> pricesList = await getDailyPrices();
-      
+      final prices = await getDailyPrices();
       emit(state.copyWith(
-        isLoading: false,
-        allPrices: pricesList,
-        filteredPrices: pricesList,
-        errorMessage: pricesList.isEmpty ? 'අද දින මිල ගණන් දත්ත නොමැත.' : null,
+        isLoadingPrices: false,
+        allPrices:       prices,
+        filteredPrices:  _applyFilters(prices, state.searchQuery, state.selectedDistrict),
       ));
     } catch (e) {
       emit(state.copyWith(
-        isLoading: false,
-        errorMessage: 'දත්ත ලබාගැනීමේදී දෝෂයක් සිදුවිය: ${e.toString()}',
+        isLoadingPrices: false,
+        errorMessage:    'Failed to load prices: ${e.toString()}',
       ));
     }
   }
 
-  // UseCase එකෙන් Either<Failure, Map> එකක් එන නිසා fold පාවිච්චි කරයි
-  Future<void> _onLoadTrends(
-    LoadPriceTrendsEvent event,
+  // ── Load supply analytics ──────────────────────────────────────────────────
+  Future<void> _onLoadSupply(
+    LoadSupplyStatusEvent event,
     Emitter<PriceState> emit,
   ) async {
-    final result = await getPriceTrends(event.productName);
-    
-    result.fold(
-      (Failure f) {
-        emit(state.copyWith(
-          errorMessage: 'මිල ප්‍රවණතා ලබාගත නොහැක: ${f.message}'
-        ));
-      },
-      (Map<DateTime, double> trendsMap) {
-        emit(state.copyWith(
-          trends: trendsMap,
-          selectedProduct: event.productName,
-        ));
-      },
-    );
+    emit(state.copyWith(isLoadingAnalytics: true));
+    try {
+      final analytics = await getSupplyStatus();
+      emit(state.copyWith(isLoadingAnalytics: false, supplyAnalytics: analytics));
+    } catch (e) {
+      emit(state.copyWith(isLoadingAnalytics: false));
+    }
   }
 
-  void _onSearch(
-    SearchPricesEvent event,
+  // ── Load AI forecast ───────────────────────────────────────────────────────
+  Future<void> _onLoadForecast(
+    LoadForecastEvent event,
     Emitter<PriceState> emit,
-  ) {
-    final query = event.query.trim().toLowerCase();
-    
-    if (query.isEmpty) {
-      emit(state.copyWith(filteredPrices: state.allPrices));
-      return;
+  ) async {
+    emit(state.copyWith(isLoadingForecast: true));
+    try {
+      final forecastResult = await getForecast(event.cropName);
+      final history = await getPriceHistory(event.cropName);
+      emit(state.copyWith(
+        isLoadingForecast: false,
+        forecast:     forecastResult,
+        priceHistory: history,
+      ));
+    } catch (e) {
+      emit(state.copyWith(isLoadingForecast: false));
     }
+  }
 
-    final filtered = state.allPrices
-        .where((PriceEntity p) => p.productName.toLowerCase().contains(query))
-        .toList();
-        
-    emit(state.copyWith(filteredPrices: filtered));
+  // ── Search filter ──────────────────────────────────────────────────────────
+  void _onSearch(SearchPricesEvent event, Emitter<PriceState> emit) {
+    final q = event.query.trim().toLowerCase();
+    emit(state.copyWith(
+      searchQuery:    event.query,
+      filteredPrices: _applyFilters(state.allPrices, q, state.selectedDistrict),
+    ));
+  }
+
+  // ── District filter ────────────────────────────────────────────────────────
+  void _onFilterDistrict(FilterByDistrictEvent event, Emitter<PriceState> emit) {
+    emit(state.copyWith(
+      selectedDistrict: event.district,
+      filteredPrices:   _applyFilters(state.allPrices, state.searchQuery, event.district),
+    ));
+  }
+
+  // ── Refresh everything ─────────────────────────────────────────────────────
+  Future<void> _onRefresh(
+    RefreshAllPricesEvent event,
+    Emitter<PriceState> emit,
+  ) async {
+    add(const LoadDailyPricesEvent());
+    add(const LoadSupplyStatusEvent());
+  }
+
+  // ── Filter helper ──────────────────────────────────────────────────────────
+  List<PriceEntity> _applyFilters(
+      List<PriceEntity> prices, String query, String district) {
+    return prices.where((p) {
+      final matchQuery = query.isEmpty ||
+          p.cropName.toLowerCase().contains(query) ||
+          p.marketName.toLowerCase().contains(query) ||
+          p.district.toLowerCase().contains(query);
+      final matchDistrict = district == 'All' || p.district == district;
+      return matchQuery && matchDistrict;
+    }).toList();
   }
 }

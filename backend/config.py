@@ -1,20 +1,36 @@
+
+
+# backend/config.py
+# Smart Harvest — Centralised Configuration
+
 import os
-from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class Config:
-    # Load from environment in production
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
-    MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/smart_harvest")
+    # ── Flask ─────────────────────────────────────────────────────────────────
+    SECRET_KEY   = os.environ.get("SECRET_KEY", "smartharvest-dev-secret")
+    DEBUG        = os.environ.get("FLASK_DEBUG", "true").lower() == "true"
+    JSON_SORT_KEYS = False
 
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-secret-change-me")
-    JWT_ALGORITHM = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=12)
+    # ── Firebase ──────────────────────────────────────────────────────────────
+    # Path to your serviceAccountKey.json (never commit this file)
+    FIREBASE_CREDENTIALS = os.environ.get("FIREBASE_CREDENTIALS", "serviceAccountKey.json")
+    FIREBASE_PROJECT_ID  = os.environ.get("FIREBASE_PROJECT_ID",  "smart-harvest-f27d4")
 
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    # ── Weather API (OpenWeatherMap — free tier) ───────────────────────────────
+    # Get your key at: https://openweathermap.org/api
+    OPENWEATHER_API_KEY  = os.environ.get("OPENWEATHER_API_KEY", "")
+    OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5"
 
-    WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
-    WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather"
+    # ── ML Model ─────────────────────────────────────────────────────────────
+    ML_MODEL_DIR     = os.path.join(os.path.dirname(__file__), "price_service", "models")
+    WFP_DATA_PATH    = os.path.join(os.path.dirname(__file__), "price_service", "wfp_food_prices_lka.csv")
+    FORECAST_DAYS    = 7
+    MIN_HISTORY_DAYS = 7
 
-    # Logging
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+    # ── CORS ──────────────────────────────────────────────────────────────────
+    CORS_ORIGINS = ["http://localhost:*", "https://smartharvest.lk"]
+

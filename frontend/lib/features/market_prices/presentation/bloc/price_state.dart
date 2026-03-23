@@ -2,59 +2,81 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/price.dart';
 
 class PriceState extends Equatable {
-  final bool isLoading;
+  final bool isLoadingPrices;
+  final bool isLoadingAnalytics;
+  final bool isLoadingForecast;
   final String? errorMessage;
-  final List<PriceEntity> allPrices;      // මේක එකතු කළා
-  final List<PriceEntity> filteredPrices; // UI එකේ පාවිච්චි වෙන්නේ මේකයි
-  final Map<DateTime, double> trends;
-  final String? selectedProduct;
+
+  final List<PriceEntity> allPrices;
+  final List<PriceEntity> filteredPrices;
+  final SupplyAnalyticsEntity? supplyAnalytics;
+  final ForecastEntity? forecast;
+  final List<PriceHistoryPoint> priceHistory;
+
+  final String searchQuery;
+  final String selectedDistrict;
 
   const PriceState({
-    required this.isLoading,
-    required this.allPrices,
-    required this.filteredPrices,
-    required this.trends,
+    this.isLoadingPrices    = false,
+    this.isLoadingAnalytics = false,
+    this.isLoadingForecast  = false,
     this.errorMessage,
-    this.selectedProduct,
+    this.allPrices       = const [],
+    this.filteredPrices  = const [],
+    this.supplyAnalytics,
+    this.forecast,
+    this.priceHistory    = const [],
+    this.searchQuery     = '',
+    this.selectedDistrict = 'All',
   });
 
-  factory PriceState.initial() {
-    return const PriceState(
-      isLoading: false,
-      allPrices: [],
-      filteredPrices: [],
-      trends: {},
-      errorMessage: null,
-      selectedProduct: null,
-    );
+  factory PriceState.initial() => const PriceState();
+
+  bool get isLoading => isLoadingPrices || isLoadingAnalytics;
+
+  /// All unique districts from loaded prices.
+  List<String> get districts {
+    final set = <String>{'All'};
+    for (final p in allPrices) {
+      if (p.district.isNotEmpty) set.add(p.district);
+    }
+    return set.toList()..sort();
   }
 
   PriceState copyWith({
-    bool? isLoading,
+    bool?   isLoadingPrices,
+    bool?   isLoadingAnalytics,
+    bool?   isLoadingForecast,
     String? errorMessage,
-    List<PriceEntity>? allPrices,
-    List<PriceEntity>? filteredPrices,
-    Map<DateTime, double>? trends,
-    String? selectedProduct,
-    bool clearError = false, // Error එක අයින් කරන්න ඕන වුණොත් පාවිච්චි කරන්න
+    List<PriceEntity>?        allPrices,
+    List<PriceEntity>?        filteredPrices,
+    SupplyAnalyticsEntity?    supplyAnalytics,
+    ForecastEntity?           forecast,
+    List<PriceHistoryPoint>?  priceHistory,
+    String? searchQuery,
+    String? selectedDistrict,
+    bool    clearError = false,
   }) {
     return PriceState(
-      isLoading: isLoading ?? this.isLoading,
-      allPrices: allPrices ?? this.allPrices,
-      filteredPrices: filteredPrices ?? this.filteredPrices,
-      trends: trends ?? this.trends,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      selectedProduct: selectedProduct ?? this.selectedProduct,
+      isLoadingPrices:    isLoadingPrices    ?? this.isLoadingPrices,
+      isLoadingAnalytics: isLoadingAnalytics ?? this.isLoadingAnalytics,
+      isLoadingForecast:  isLoadingForecast  ?? this.isLoadingForecast,
+      errorMessage:       clearError ? null : (errorMessage ?? this.errorMessage),
+      allPrices:          allPrices          ?? this.allPrices,
+      filteredPrices:     filteredPrices     ?? this.filteredPrices,
+      supplyAnalytics:    supplyAnalytics    ?? this.supplyAnalytics,
+      forecast:           forecast           ?? this.forecast,
+      priceHistory:       priceHistory       ?? this.priceHistory,
+      searchQuery:        searchQuery        ?? this.searchQuery,
+      selectedDistrict:   selectedDistrict   ?? this.selectedDistrict,
     );
   }
 
   @override
   List<Object?> get props => [
-        isLoading,
-        errorMessage,
-        allPrices,
-        filteredPrices,
-        trends,
-        selectedProduct,
+        isLoadingPrices, isLoadingAnalytics, isLoadingForecast,
+        errorMessage, allPrices, filteredPrices,
+        supplyAnalytics, forecast, priceHistory,
+        searchQuery, selectedDistrict,
       ];
 }

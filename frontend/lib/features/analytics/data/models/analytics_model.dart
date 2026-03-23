@@ -10,6 +10,7 @@ class AnalyticsModel extends Analytics {
   });
 
   factory AnalyticsModel.fromJson(Map<String, dynamic> json) {
+    // Flask returns nums that may be int or double — coerce safely
     final rawMap =
         json['cropDistribution'] as Map<String, dynamic>? ?? {};
     final casted = rawMap.map(
@@ -17,9 +18,9 @@ class AnalyticsModel extends Analytics {
     );
 
     return AnalyticsModel(
-      totalCrops: json['totalCrops'] as int,
-      totalOrders: json['totalOrders'] as int,
-      totalRevenue: (json['totalRevenue'] as num).toDouble(),
+      totalCrops:       (json['totalCrops']   as num? ?? 0).toInt(),
+      totalOrders:      (json['totalOrders']  as num? ?? 0).toInt(),
+      totalRevenue:     (json['totalRevenue'] as num? ?? 0).toDouble(),
       cropDistribution: casted,
     );
   }

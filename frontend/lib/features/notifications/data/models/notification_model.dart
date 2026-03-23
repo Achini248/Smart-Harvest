@@ -1,3 +1,4 @@
+// lib/features/notifications/data/models/notification_model.dart
 import '../../domain/entities/notification.dart';
 
 class NotificationModel extends NotificationEntity {
@@ -16,46 +17,44 @@ class NotificationModel extends NotificationEntity {
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      body: json['body'] as String,
-      type: json['type'] as String,
-      priority: json['priority'] as String,
-      isRead: json['isRead'] as bool? ?? false,
-      imageUrl: json['imageUrl'] as String?,
+      id:        json['id']       as String? ?? '',
+      title:     json['title']    as String? ?? '',
+      body:      json['body']     as String? ?? '',
+      type:      json['type']     as String? ?? 'system',
+      priority:  json['priority'] as String? ?? 'low',
+      isRead:    json['isRead']   as bool?   ?? false,
+      imageUrl:  json['imageUrl'] as String?,
       actionUrl: json['actionUrl'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      ownerId: json['ownerId'] as String,
+      ownerId:   json['ownerId']  as String? ?? '',
+      createdAt: _parseDate(json['createdAt']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'body': body,
-      'type': type,
-      'priority': priority,
-      'isRead': isRead,
-      'imageUrl': imageUrl,
-      'actionUrl': actionUrl,
-      'createdAt': createdAt.toIso8601String(),
-      'ownerId': ownerId,
-    };
+  static DateTime _parseDate(dynamic v) {
+    if (v == null) return DateTime.now();
+    if (v is String) {
+      // Handle both ISO strings and Firestore Timestamp maps
+      return DateTime.tryParse(v) ?? DateTime.now();
+    }
+    // Firestore Timestamp object (from Dart SDK) has a toDate() but we
+    // receive it as a map when deserialised from JSON: {_seconds, _nanoseconds}
+    if (v is Map) {
+      final secs = (v['_seconds'] as num?)?.toInt() ?? 0;
+      return DateTime.fromMillisecondsSinceEpoch(secs * 1000);
+    }
+    return DateTime.now();
   }
 
-  factory NotificationModel.fromEntity(NotificationEntity entity) {
-    return NotificationModel(
-      id: entity.id,
-      title: entity.title,
-      body: entity.body,
-      type: entity.type,
-      priority: entity.priority,
-      isRead: entity.isRead,
-      imageUrl: entity.imageUrl,
-      actionUrl: entity.actionUrl,
-      createdAt: entity.createdAt,
-      ownerId: entity.ownerId,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'id':        id,
+        'title':     title,
+        'body':      body,
+        'type':      type,
+        'priority':  priority,
+        'isRead':    isRead,
+        'imageUrl':  imageUrl,
+        'actionUrl': actionUrl,
+        'createdAt': createdAt.toIso8601String(),
+        'ownerId':   ownerId,
+      };
 }

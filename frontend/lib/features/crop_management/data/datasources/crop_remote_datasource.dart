@@ -1,139 +1,110 @@
-//crop_remote_datasourse.dart
+// lib/features/crop_management/data/datasources/crop_remote_datasource.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/crop_model.dart';
 
 abstract class CropRemoteDataSource {
   Future<List<CropModel>> getCrops();
-  Future<CropModel> getCropById(String id);
-  Future<CropModel> addCrop(CropModel crop);
-  Future<CropModel> updateCrop(CropModel crop);
-  Future<void> deleteCrop(String id);
+  Future<CropModel>       getCropById(String id);
+  Future<CropModel>       addCrop(CropModel crop);
+  Future<CropModel>       updateCrop(CropModel crop);
+  Future<void>            deleteCrop(String id);
   Stream<List<CropModel>> watchCrops();
 }
 
 class CropRemoteDataSourceImpl implements CropRemoteDataSource {
   final FirebaseFirestore _firestore;
 
-  static const String _collection = 'crops';
-
   CropRemoteDataSourceImpl({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  CollectionReference<Map<String, dynamic>> get _cropsRef =>
-      _firestore.collection(_collection);
+  String get _uid => FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  // ── Get all crops ──────────────────────────────────────────────────────────
+  CollectionReference<Map<String, dynamic>> get _col =>
+      _firestore.collection('crops');
+
   @override
   Future<List<CropModel>> getCrops() async {
     try {
-      final snapshot = await _cropsRef
+      final snap = await _col
+          .where('ownerId', isEqualTo: _uid)
           .orderBy('createdAt', descending: true)
           .get();
-      return snapshot.docs
-          .map((doc) => CropModel.fromFirestore(doc))
-          .toList();
+      return snap.docs.map(CropModel.fromFirestore).toList();
     } on FirebaseException catch (e) {
       throw ServerException(message: e.message ?? 'Failed to fetch crops.');
-    } catch (e) {
-      throw ServerException(message: e.toString());
     }
   }
 
-  // ── Get crop by ID ─────────────────────────────────────────────────────────
   @override
   Future<CropModel> getCropById(String id) async {
     try {
-      final doc = await _cropsRef.doc(id).get();
-      if (!doc.exists) {
-        throw const ServerException(message: 'Crop not found.');
-      }
+      final doc = await _col.doc(id).get();
+      if (!doc.exists) throw const ServerException(message: 'Crop not found.');
       return CropModel.fromFirestore(doc);
     } on FirebaseException catch (e) {
       throw ServerException(message: e.message ?? 'Failed to fetch crop.');
     }
   }
 
-  // ── Add crop ───────────────────────────────────────────────────────────────
   @override
   Future<CropModel> addCrop(CropModel crop) async {
     try {
-      final docRef = _cropsRef.doc(); // auto-generate ID
+      final ref = _col.doc();
+      final now = DateTime.now();
       final newCrop = CropModel(
-        id: docRef.id,
-        name: crop.name,
-        type: crop.type,
-        quantity: crop.quantity,
-        unit: crop.unit,
-        location: crop.location,
-        plantedDate: crop.plantedDate,
-        harvestDate: crop.harvestDate,
-        status: crop.status,
-        notes: crop.notes,
-        ownerId: crop.ownerId,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        id: ref.id, name: crop.name, type: crop.type,
+        quantity: crop.quantity, unit: crop.unit,
+        location: crop.location, plantedDate: crop.plantedDate,
+        harvestDate: crop.harvestDate, status: crop.status,
+        notes: crop.notes, ownerId: _uid,
+        createdAt: now, updatedAt: now,
       );
-      await docRef.set(newCrop.toFirestore());
+      await ref.set(newCrop.toFirestore());
       return newCrop;
     } on FirebaseException catch (e) {
       throw ServerException(message: e.message ?? 'Failed to add crop.');
-    } catch (e) {
-      throw ServerException(message: e.toString());
     }
   }
 
-  // ── Update crop ────────────────────────────────────────────────────────────
   @override
   Future<CropModel> updateCrop(CropModel crop) async {
     try {
-      final updatedCrop = CropModel(
-        id: crop.id,
-        name: crop.name,
-        type: crop.type,
-        quantity: crop.quantity,
-        unit: crop.unit,
-        location: crop.location,
-        plantedDate: crop.plantedDate,
-        harvestDate: crop.harvestDate,
-        status: crop.status,
-        notes: crop.notes,
-        ownerId: crop.ownerId,
-        createdAt: crop.createdAt,
-        updatedAt: DateTime.now(),
+      final updated = CropModel(
+        id: crop.id, name: crop.name, type: crop.type,
+        quantity: crop.quantity, unit: crop.unit,
+        location: crop.location, plantedDate: crop.plantedDate,
+        harvestDate: crop.harvestDate, status: crop.status,
+        notes: crop.notes, ownerId: crop.ownerId,
+        createdAt: crop.createdAt, updatedAt: DateTime.now(),
       );
-      await _cropsRef.doc(crop.id).update(updatedCrop.toFirestore());
-      return updatedCrop;
+      await _col.doc(crop.id).update(updated.toFirestore());
+      return updated;
     } on FirebaseException catch (e) {
       throw ServerException(message: e.message ?? 'Failed to update crop.');
-    } catch (e) {
-      throw ServerException(message: e.toString());
     }
   }
 
-  // ── Delete crop ────────────────────────────────────────────────────────────
   @override
   Future<void> deleteCrop(String id) async {
     try {
-      await _cropsRef.doc(id).delete();
+      await _col.doc(id).delete();
     } on FirebaseException catch (e) {
       throw ServerException(message: e.message ?? 'Failed to delete crop.');
     }
   }
 
-  // ── Watch crops (real-time stream) ─────────────────────────────────────────
   @override
   Stream<List<CropModel>> watchCrops() {
-    return _cropsRef
+    return _col
+        .where('ownerId', isEqualTo: _uid)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => CropModel.fromFirestore(doc)).toList())
-        .handleError((error) {
+        .map((s) => s.docs.map(CropModel.fromFirestore).toList())
+        .handleError((e) {
       throw ServerException(
-          message: error is FirebaseException
-              ? error.message ?? 'Stream error.'
-              : error.toString());
+          message: e is FirebaseException ? e.message ?? 'Stream error.' : e.toString());
     });
   }
 }
