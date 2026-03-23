@@ -31,7 +31,7 @@ class MessageEntity extends Equatable {
 }
 
 
-class ConversationEntity extends Equascreentable {
+class ConversationEntity extends Equatable {
   final String conversationId;
   final String otherUserId;
   final String otherUserName;
