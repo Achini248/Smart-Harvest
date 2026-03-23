@@ -13,7 +13,7 @@ class CropBloc extends Bloc<CropEvent, CropState> {
   final UpdateCropUseCase _updateCropUseCase;
   final CropRepository _cropRepository;
 
-  // Hold current crops in memory for operations
+  
   List<Crop> _currentCrops = [];
 
   CropBloc({
