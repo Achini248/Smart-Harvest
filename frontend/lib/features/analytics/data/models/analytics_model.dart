@@ -10,7 +10,7 @@ class AnalyticsModel extends Analytics {
   });
 
   factory AnalyticsModel.fromJson(Map<String, dynamic> json) {
-    // Flask returns nums that may be int or double — coerce safely
+    
     final rawMap =
         json['cropDistribution'] as Map<String, dynamic>? ?? {};
     final casted = rawMap.map(
