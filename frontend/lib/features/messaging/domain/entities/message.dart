@@ -30,8 +30,8 @@ class MessageEntity extends Equatable {
       ];
 }
 
-/// Lightweight summary shown in the messages list screen
-class ConversationEntity extends Equatable {
+
+class ConversationEntity extends Equascreentable {
   final String conversationId;
   final String otherUserId;
   final String otherUserName;
