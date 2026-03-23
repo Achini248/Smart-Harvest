@@ -47,7 +47,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
       OpenConversationEvent e, Emitter<MessageState> emit) async {
     emit(const MessageLoadingState());
 
-    // Cancel existing stream subscription
+   
     await _messagesSub?.cancel();
 
     emit(ChatOpenState(
