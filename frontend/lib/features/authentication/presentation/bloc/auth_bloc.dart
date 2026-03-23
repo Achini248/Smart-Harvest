@@ -1,7 +1,7 @@
-// lib/features/authentication/presentation/bloc/auth_bloc.dart
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/constants/api_constants.dart';
 import 'auth_event.dart';
@@ -9,14 +9,16 @@ import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   late final StreamSubscription<User?> _authSubscription;
 
   AuthBloc() : super(const AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
     on<LogoutEvent>(_onLogout);
+    on<GoogleSignInEvent>(_onGoogleSignIn);
+    on<ForgotPasswordEvent>(_onForgotPassword);
 
-    // Firebase auth state stream drives all state changes
     _authSubscription = _firebaseAuth.authStateChanges().listen((user) {
       if (user != null) {
         emit(Authenticated(
@@ -24,7 +26,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           email: user.email,
           displayName: user.displayName,
         ));
-        // Sync profile to Flask backend (non-blocking)
         _syncProfile(user);
       } else {
         emit(const Unauthenticated());
@@ -40,7 +41,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
       );
-      // Stream listener emits Authenticated and calls _syncProfile
     } on FirebaseAuthException catch (e) {
       emit(AuthError(message: _friendlyError(e.code)));
     } catch (e) {
@@ -56,12 +56,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
       );
-      // Update display name if provided
       if (event.displayName != null && event.displayName!.isNotEmpty) {
         await cred.user?.updateDisplayName(event.displayName);
         await cred.user?.reload();
       }
-      // Stream listener handles the rest
+      await cred.user?.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       emit(AuthError(message: _friendlyError(e.code)));
     } catch (e) {
@@ -69,37 +68,86 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // ── Google Sign In ─────────────────────────────────────────────────────────
+  Future<void> _onGoogleSignIn(
+      GoogleSignInEvent event, Emitter<AuthState> emit) async {
+    emit(const AuthLoading());
+    try {
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        emit(const Unauthenticated());
+        return;
+      }
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      await _firebaseAuth.signInWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(message: _friendlyError(e.code)));
+    } catch (e) {
+      emit(AuthError(message: 'Google sign-in failed. Please try again.'));
+    }
+  }
+
+  // ── Forgot Password ────────────────────────────────────────────────────────
+  Future<void> _onForgotPassword(
+      ForgotPasswordEvent event, Emitter<AuthState> emit) async {
+    emit(const AuthLoading());
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: event.email);
+      emit(const PasswordResetSent());
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(message: _friendlyError(e.code)));
+    } catch (e) {
+      emit(AuthError(
+          message: 'Failed to send reset email. Please try again.'));
+    }
+  }
+
   // ── Logout ─────────────────────────────────────────────────────────────────
   Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
+    await _googleSignIn.signOut();
     await _firebaseAuth.signOut();
   }
 
-  // ── Sync profile to Flask backend ──────────────────────────────────────────
-  /// Called automatically after every login / registration.
-  /// Creates or updates the Firestore user document via Flask.
+  // ── Sync profile ───────────────────────────────────────────────────────────
   Future<void> _syncProfile(User user) async {
     try {
       await ApiClient.instance.post(ApiConstants.authProfile, {
         'email': user.email ?? '',
-        'name':  user.displayName ?? (user.email?.split('@').first ?? 'User'),
+        'name': user.displayName ??
+            (user.email?.split('@').first ?? 'User'),
       });
-    } catch (_) {
-      // Profile sync failure should not block the user
-    }
+    } catch (_) {}
   }
 
-  // ── Human-readable Firebase errors ────────────────────────────────────────
+  // ── Friendly error messages ────────────────────────────────────────────────
   String _friendlyError(String code) {
     switch (code) {
-      case 'user-not-found':      return 'No account found with this email.';
-      case 'wrong-password':      return 'Incorrect password. Please try again.';
-      case 'email-already-in-use': return 'An account already exists for this email.';
-      case 'weak-password':       return 'Password must be at least 6 characters.';
-      case 'invalid-email':       return 'Please enter a valid email address.';
-      case 'user-disabled':       return 'This account has been disabled.';
-      case 'too-many-requests':   return 'Too many attempts. Please try again later.';
-      case 'network-request-failed': return 'No internet connection.';
-      default:                    return 'Authentication failed. Please try again.';
+      case 'user-not-found':
+        return 'No account found with this email.';
+      case 'wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'invalid-credential':
+        return 'Invalid email or password. Please try again.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'email-already-in-use':
+        return 'An account already exists for this email.';
+      case 'weak-password':
+        return 'Password must be at least 6 characters.';
+      case 'user-disabled':
+        return 'This account has been disabled.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      case 'network-request-failed':
+        return 'No internet connection.';
+      case 'account-exists-with-different-credential':
+        return 'An account already exists with a different sign-in method.';
+      default:
+        return 'Authentication failed. Please try again.';
     }
   }
 
