@@ -1,3 +1,4 @@
+//crop.dart
 import 'package:equatable/equatable.dart';
 
 class Crop extends Equatable {
