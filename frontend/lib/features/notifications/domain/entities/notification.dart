@@ -4,7 +4,7 @@ class NotificationEntity extends Equatable {
   final String id;
   final String title;
   final String body;
-  final String type; // 'order', 'price_update', 'weather_alert', 'system'
+  final String type; 
   final String priority;
   final bool isRead;
   final String? imageUrl;
