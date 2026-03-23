@@ -33,9 +33,7 @@ migrate_working_dir/
 /build/
 /coverage/
 
-serviceAccountKey.json
-.env
-*.json
+
 
 
 
