@@ -1,7 +1,7 @@
 import '../entities/notification.dart';
 
 abstract class NotificationRepository {
-  /// Returns List<NotificationEntity> or null if error occurs
+  /// Returns List<NotificationEntity> or null if error occurss
   Future<List<NotificationEntity>?> getNotifications();
   
   /// Returns updated notification or null if error
