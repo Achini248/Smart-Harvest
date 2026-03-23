@@ -21,7 +21,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   CollectionReference<Map<String, dynamic>> get _conversations =>
       _db.collection('conversations');
 
-  // ── Conversation ID helper (deterministic, order-independent) ────────────
+  
   String _convId(String a, String b) {
     final ids = [a, b]..sort();
     return '${ids[0]}_${ids[1]}';
