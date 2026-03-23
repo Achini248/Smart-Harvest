@@ -8,7 +8,7 @@ abstract class CropEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Load all crops from Firestore.
+
 class LoadCropsEvent extends CropEvent {
   const LoadCropsEvent();
 }
