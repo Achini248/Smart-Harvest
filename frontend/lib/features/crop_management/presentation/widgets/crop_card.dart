@@ -68,7 +68,7 @@ class CropCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
 
-                  // Name and type
+                  
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
