@@ -1,7 +1,43 @@
-# Backend - credentials and environment
+# ── Credentials & Environment ─────────────────────────────────────────────────
 backend/serviceAccountKey.json
 backend/serviceAccountKey*.json
 backend/.env
+backend/.env.local
+backend/.env.production
+
+# ── Python / Backend ──────────────────────────────────────────────────────────
 backend/venv/
+backend/.venv/
 backend/__pycache__/
 backend/*.pyc
+backend/*.pyo
+backend/*.log
+backend/*.db
+backend/*.sqlite
+
+# ── Flutter / Frontend ────────────────────────────────────────────────────────
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/build/
+frontend/.pub-cache/
+frontend/.pub/
+frontend/pubspec.lock
+
+# ── Android ───────────────────────────────────────────────────────────────────
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/android/key.properties
+frontend/android/app/google-services.json
+
+# ── iOS ───────────────────────────────────────────────────────────────────────
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+
+# ── General ───────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+*.iml
