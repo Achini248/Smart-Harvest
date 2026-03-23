@@ -23,7 +23,7 @@ class SmartHarvestApp extends StatelessWidget {
           if (state is Authenticated) {
             initialRoute = RouteNames.home;
           } else if (state is Unauthenticated) {
-            initialRoute = RouteNames.splash; // splash → authSelection → guest/login/register
+            initialRoute = RouteNames.splash; 
           } else {
             initialRoute = RouteNames.splash;
           }
