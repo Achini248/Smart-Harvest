@@ -1,0 +1,35 @@
+import 'package:equatable/equatable.dart';
+
+class UserEntity extends Equatable {
+  final String id;
+  final String email;
+  final String? name;
+  final String? phoneNo;
+  final String? location;
+  final String? profilePhotoUrl;
+  final String role; 
+
+  const UserEntity({
+    required this.id,
+    required this.email,
+    this.name,
+    this.phoneNo,
+    this.location,
+    this.profilePhotoUrl,
+    this.role = 'farmer',
+  });
+
+  // ProfileSettingsPage එකේ එන error එක නැති කරන්න මේ getter එක අවශ්‍යයි
+  String get displayName => name ?? email.split('@')[0];
+
+  @override
+  List<Object?> get props => [
+        id, 
+        email, 
+        name, 
+        phoneNo, 
+        location, 
+        profilePhotoUrl, 
+        role
+      ];
+}

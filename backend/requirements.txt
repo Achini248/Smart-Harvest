@@ -1,0 +1,36 @@
+# Smart Harvest — Backend Requirements
+# Install: pip install -r requirements.txt
+
+# ── Web Framework ─────────────────────────────────────────────────────────────
+Flask==3.0.0
+flask-cors==4.0.0
+
+# ── Firebase (Auth verification + Firestore + FCM) ────────────────────────────
+firebase-admin==6.4.0
+
+# ── AI / Machine Learning (Price Forecasting) ────────────────────────────────
+scikit-learn==1.4.0
+numpy==1.26.3
+pandas==2.1.4
+joblib==1.3.2
+
+# ── Authentication & Security ─────────────────────────────────────────────────
+pyjwt==2.9.0
+passlib[bcrypt]==1.7.4
+
+# ── Database ──────────────────────────────────────────────────────────────────
+pymongo==4.10.1
+
+# ── Weather & HTTP ────────────────────────────────────────────────────────────
+requests==2.31.0
+httpx==0.27.2
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv==1.0.0
+
+# ── Production Server ─────────────────────────────────────────────────────────
+gunicorn==21.2.0
+
+# ── Development / Testing ─────────────────────────────────────────────────────
+pytest==7.4.3
+pytest-flask==1.3.0

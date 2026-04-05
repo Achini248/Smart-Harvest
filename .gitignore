@@ -1,0 +1,33 @@
+# ── Secrets (NEVER commit these) ─────────────────────────────────
+backend/serviceAccountKey.json
+backend/.env
+*.json.key
+
+# ── Python ───────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+
+# ── Flask ────────────────────────────────────────────────────────
+instance/
+*.sqlite
+
+# ── OS ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
